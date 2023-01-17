@@ -15,6 +15,8 @@ export default function MainExpenses() {
     getResumen()
   }, [])
 
+  //keep consistency beetwe async/await and promise
+  // the components should receive the sources.
   const getResumen = () => {
     setIsLoading(true)
     GetAll(`dashboard/resumen`).then(
