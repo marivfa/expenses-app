@@ -33,11 +33,12 @@ export default function FormLogin({ setToken }) {
       }
       setToken(profileTmp)
       setLoading(false)
-
-      /*setTimeout(function () {
+      //remove unnecessary code 
+      /*setTimeout(function () { 
         window.location.reload()
       }, 1000)*/
     } catch (error) {
+      //here you need an action, for example: you are putting loading = true at the beginning of the function, what happens if the function goes into catch
       console.log('error signing in', error)
     }
   }
@@ -55,7 +56,7 @@ export default function FormLogin({ setToken }) {
     setCreate(true)
     setForgotPass(false)
   }
-
+ //general comment change the double quotation marks for single quotation with prettier.
   return (
     <div>
       <div>

@@ -1,7 +1,9 @@
-const BASE_URL = 'http://localhost:8000/'
+const BASE_URL = 'http://localhost:8000/' // it need to change according to the enviroment.. 
 
 const auth = JSON.parse(localStorage.getItem('token'))
 
+
+//general comment: Create a single function call "makeRequest" or something and it should be used for all the request, so this way you need repeting code.
 const GetAll = async (path, pagination) => {
   try {
     const data = await fetch(pagination ? pagination : `${BASE_URL}${path}`, {

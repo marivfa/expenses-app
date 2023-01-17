@@ -19,6 +19,7 @@ export default function FormCreate() {
 
   const onSubmit = async data => {
     try {
+      //remove user variable if you don't need it
       const { user } = await Auth.signUp({
         username: data.email,
         password: data.password,
@@ -39,7 +40,7 @@ export default function FormCreate() {
       console.log('error signing up:', error)
     }
   }
-
+//general comment change the double quotation marks for single quotation with prettier.
   return (
     <div>
       {create ? (
