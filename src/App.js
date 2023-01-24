@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 
 import NavBar from './components/NavBar'
@@ -12,7 +11,7 @@ import { Amplify, Auth } from 'aws-amplify'
 import awsconfig from './aws-exports'
 Amplify.configure(awsconfig)
 
-async function signOut() {
+const signOut = async () => {
   try {
     await Auth.signOut()
     localStorage.removeItem('token')

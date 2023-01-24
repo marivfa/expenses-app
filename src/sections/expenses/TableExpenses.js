@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import '../style.css'
+import '../../style.css'
 import { faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons'
-//import ModalForm from './ModalForm'
-import { Delete, GetAll } from '../commons/Api'
+import { Delete, GetAll } from '../../commons/Api'
 import { toast } from 'react-toastify'
 
 import { InfiniteScroll } from 'react-simple-infinite-scroll'
 
 const fontInfo = <FontAwesomeIcon icon={faInfoCircle} />
 const fontDel = <FontAwesomeIcon icon={faTrash} />
-//const fontAvailable = <FontAwesomeIcon icon={faCheckCircle} />
-//const fontNonAvailable = <FontAwesomeIcon icon={faCircleMinus} />
 
-export default function Table() {
+export default function TableExpenses() {
   const cols = [
     { header: 'Date Register', field: 'date_register', type: 'text' },
     { header: 'Category', field: 'category', type: 'text' },
@@ -37,9 +34,6 @@ export default function Table() {
   const [error, setError] = useState()
   const [isDelete, setIsDelete] = useState(false)
 
-  //const [modalShow, setModalShow] = useState(false)
-  //const [objExpenses, setObjExpenses] = useState([])
-
   const navigate = useNavigate()
   const onEdit = id => {
     navigate(`/expenses/edit/${id}`)
@@ -56,73 +50,6 @@ export default function Table() {
       }
     })
   }
-
-  useEffect(() => {
-    loadMore()
-  }, [isDelete])
-
-  //Modal
-  /*const handleShow = expenses => {
-    setModalShow(true)
-    setObjExpenses(expenses)
-  }
-
-  const handleClose = () => {
-    setObjExpenses([])
-    setModalShow(false)
-    getData()
-  }*/
-
-  //Pagination
-  /*const handleClick = url => {
-    GetAll('expenses', url).then(res => {
-      if (res) {
-        setData(res)
-      }
-    })
-  }*/
-  //Filters
-  /*const handleChange = event => {
-    const { name, value } = event.target
-    setParams(prevFormData => {
-      return {
-        ...prevFormData,
-        [name]: value,
-      }
-    })
-  }*/
-
-  /*useEffect(() => {
-    let queryString = Object.keys(params)
-      .map(key => (params[key] ? key + '=' + params[key] : ''))
-      .join('&')
-
-    GetAll(`expenses?${queryString}`).then(res => {
-      if (res) {
-        setData(res)
-      }
-    })
-  }, [params])*/
-
-  /*const getData = (setData, data) => {
-    console.log('here')
-    return GetAll(`expenses?limit=${limit}&offset=${offset}`).then(res => {
-      if (res) {
-        total = res.total
-        setOffset(res.offset + limit)
-        //let tmp = data
-        //tmp.push(res.items)
-        //setData(data => [...data, ...res.items])
-        setData([...data, ...res.items])
-        console.log(data)
-        //setData(data.apply(res.items))
-      }
-    })
-  }*/
-
-  useEffect(() => {
-    loadMore()
-  }, [])
 
   const loadMore = () => {
     setIsDelete(false)
@@ -141,6 +68,14 @@ export default function Table() {
       }
     )
   }
+
+  useEffect(() => {
+    loadMore()
+  }, [isDelete])
+
+  useEffect(() => {
+    loadMore()
+  }, [])
 
   const rows = items?.map((expenses, index) => {
     return (
@@ -176,35 +111,6 @@ export default function Table() {
     return <th key={index}>{column.header}</th>
   })
 
-  /*const columnsFilter = cols.map((column, index) => {
-    return (
-      <td key={column.field}>
-        <input
-          type={column.type}
-          className="form-control"
-          name={column.field}
-          onKeyUp={handleChange}
-        />
-      </td>
-    )
-  })*/
-
-  /*const pagination = data?.links?.map((link, index) => {
-    return (
-      <Pagination.Item
-        key={index}
-        active={link.active}
-        onClick={() => handleClick(link.url)}
-      >
-        {index === 0
-          ? 'Previous'
-          : index === data.links.length - 1
-          ? 'Next'
-          : link.label}
-      </Pagination.Item>
-    )
-  })*/
-
   return (
     <div className="card shadow mb-4">
       <div className="card-header py-3">
@@ -235,23 +141,3 @@ export default function Table() {
     </div>
   )
 }
-
-/**
- * {modalShow}{' '}
-      <ModalForm
-        show={modalShow}
-        handleClose={handleClose}
-        objExpenses={objExpenses}
-      />
- 
- <button
-            title={expenses.status === 'active' ? 'Available' : 'Non available'}
-            className={`btn btn-circle btn-sm ${
-              expenses.status === 'active' ? 'btn-success' : 'btn-warning'
-            }`}
-            onClick={() => handleShow(expenses)}
-          >
-            {expenses.status === 'active' ? fontAvailable : fontNonAvailable}
-          </button>
-          &nbsp;
-      */

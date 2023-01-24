@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import '../../style.css'
 
@@ -9,6 +9,7 @@ import { GetAll, Save } from '../../commons/Api'
 export default function FormCategory() {
   const { id } = useParams()
   const isAdd = !id
+  const [isLoading, setIsLoading] = useState(true)
   const {
     register,
     formState: { errors },
@@ -23,29 +24,36 @@ export default function FormCategory() {
   }
 
   //Save Category
-  const onSubmit = data => {
+  const onSubmit = async data => {
+    setIsLoading(true)
     const method = id ? 'PUT' : 'POST'
     const URL = id ? `category/${id}` : 'category'
-    Save(URL, method, data).then(res => {
-      if (res) {
-        toast.success('Submitted successfully')
-        onCancel()
-      } else {
-        toast.error(`Form submit error ${res.error} `)
-      }
-    })
+    data.id_user = 0
+    const res = await Save(URL, method, data)
+    if (res) {
+      toast.success('Submitted successfully')
+      onCancel()
+    } else {
+      toast.error(`Form submit error ${res.error} `)
+    }
+    setIsLoading(false)
+  }
+
+  const getCategory = async () => {
+    setIsLoading(true)
+    const res = await GetAll(`category/${id}`)
+    if (res) {
+      Object.entries(res).forEach(([key, value]) => {
+        setValue(key, value)
+      })
+    }
+    setIsLoading(false)
   }
 
   //Get One Category -- Edit
   useEffect(() => {
     if (!isAdd) {
-      GetAll(`category/${id}`).then(res => {
-        if (res) {
-          Object.entries(res).forEach(([key, value]) => {
-            setValue(key, value)
-          })
-        }
-      })
+      getCategory()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

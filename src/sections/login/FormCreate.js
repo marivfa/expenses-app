@@ -1,25 +1,26 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import '../../style.css'
-
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Auth } from 'aws-amplify'
 import FormCode from './FormCode'
 
-export default function FormCreate() {
+import '../../style.css'
+
+export default function FormCreate({ onClickForgotPass, onClickLogin }) {
   const [create, setCreate] = useState(true)
   const [userdata, setUserdata] = useState([])
+  const [error, setError] = useState()
+
   const {
     register,
     formState: { errors },
     handleSubmit,
-    setValue,
   } = useForm()
 
   const onSubmit = async data => {
+    setError()
     try {
-      const { user } = await Auth.signUp({
+      await Auth.signUp({
         username: data.email,
         password: data.password,
         attributes: {
@@ -32,11 +33,11 @@ export default function FormCreate() {
           enabled: true,
         },
       })
-      //console.log(user)
+
       setCreate(false)
       setUserdata({ username: data.email, name: data.name })
     } catch (error) {
-      console.log('error signing up:', error)
+      setError(error.message)
     }
   }
 
@@ -50,6 +51,8 @@ export default function FormCreate() {
             </h6>
           </div>
           <div className="card-body">
+            <h6 className="m-0 font-weight-bold text-danger">{error}</h6>
+            <hr />
             <form className="user" onSubmit={handleSubmit(onSubmit)}>
               <div className="form-group">
                 <input
@@ -66,11 +69,17 @@ export default function FormCreate() {
 
               <div className="form-group">
                 <input
-                  type="text"
+                  type="email"
                   className="form-control"
                   name="Email"
                   placeholder="Email"
-                  {...register('email', { required: true })}
+                  {...register('email', {
+                    required: true,
+                    pattern: {
+                      value: /\S+@\S+\.\S+/,
+                      message: 'Entered value does not match email format',
+                    },
+                  })}
                 />
                 <span className="form-error">
                   {errors.email && 'Email is required'}
@@ -82,7 +91,13 @@ export default function FormCreate() {
                   className="form-control"
                   name="Password"
                   placeholder="Password"
-                  {...register('password', { required: true })}
+                  {...register('password', {
+                    required: true,
+                    minLength: {
+                      value: 8,
+                      message: 'min length is 8',
+                    },
+                  })}
                 />
                 <span className="form-error">
                   {errors.password && 'Password is required'}
@@ -95,12 +110,22 @@ export default function FormCreate() {
                 </button>
               </div>
               <div className="text-center">
-                <a className="small" href="forgot-password.html">
+                <a
+                  className="small"
+                  href="#"
+                  role="button"
+                  onClick={onClickForgotPass}
+                >
                   Forgot Password?
                 </a>
               </div>
               <div className="text-center">
-                <a className="small" href="register.html">
+                <a
+                  className="small"
+                  href="#"
+                  role="button"
+                  onClick={onClickLogin}
+                >
                   Already have an account? Login!
                 </a>
               </div>
@@ -108,7 +133,11 @@ export default function FormCreate() {
           </div>
         </div>
       ) : (
-        <FormCode userdata={userdata} />
+        <FormCode
+          userdata={userdata}
+          onClickLogin={onClickLogin}
+          type="create"
+        />
       )}
     </div>
   )

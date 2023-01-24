@@ -19,7 +19,11 @@ export default function TopNavbar({ signOut }) {
           <NavDropdown
             title={
               <div className="pull-left">
-                Hola
+                {
+                  JSON.parse(
+                    JSON.parse(localStorage.getItem('token')).attributes
+                  ).name
+                }
                 <img
                   className="img-profile rounded-circle"
                   src="../img/undraw_profile.svg"

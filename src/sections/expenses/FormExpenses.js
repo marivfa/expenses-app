@@ -38,7 +38,7 @@ export default function FormExpenses() {
   }
 
   //Save Expenses
-  const onSubmit = data => {
+  const onSubmit = async data => {
     const method = id ? 'PUT' : 'POST'
     //delete data.id
     //delete data.status
@@ -57,41 +57,45 @@ export default function FormExpenses() {
     }
 
     const URL = id ? `expenses/${id}` : 'expenses'
-    Save(URL, method, data).then(res => {
-      if (res) {
-        toast.success('Submitted successfully')
-        onCancel()
-      } else {
-        toast.error(`Form submit error ${res.error} `)
-      }
-    })
+    const res = await Save(URL, method, data)
+    if (res) {
+      toast.success('Submitted successfully')
+      onCancel()
+    } else {
+      toast.error(`Form submit error ${res.error} `)
+    }
+  }
+
+  const getExpenses = async () => {
+    const res = await GetAll(`expenses/${id}`)
+    if (res) {
+      Object.entries(res).forEach(([key, value]) => {
+        setValue(key, value)
+        if (key === 'category') {
+          setCategoryName(value)
+        }
+      })
+    }
+  }
+
+  const getCategory = async () => {
+    const res = await GetAll('category')
+    if (res) {
+      setCategory(res)
+    }
   }
 
   //Get One Expenses -- Edit
   useEffect(() => {
     if (!isAdd) {
-      GetAll(`expenses/${id}`).then(res => {
-        if (res) {
-          console.log(res)
-          Object.entries(res).forEach(([key, value]) => {
-            setValue(key, value)
-            if (key === 'category') {
-              setCategoryName(value)
-            }
-          })
-        }
-      })
+      getExpenses()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   //Get Category -- Autocomplete
   useEffect(() => {
-    GetAll('category').then(res => {
-      if (res) {
-        setCategory(res)
-      }
-    })
+    getCategory()
   }, [])
 
   return (

@@ -9,12 +9,14 @@ import MainRemainders from './sections/remainders/MainRemainders'
 import FormRemainders from './sections/remainders/FormRemainders'
 import MainDashboard from './sections/dashboard/MainDashboard'
 import FormLogin from './sections/login/FormLogin'
+import UsersProfile from './sections/users/UsersProfile'
 
 export default function MainRouter() {
   return (
     <Routes>
       <Route path="/" exact element={<MainDashboard />} />
       <Route path="/login" exact element={<FormLogin />} />
+      <Route path="/profile" exact element={<UsersProfile />} />
       <Route path="/dashboard" exact element={<MainDashboard />} />
       <Route path="/category" exact element={<MainCategory />} />
       <Route path="/category/create" exact element={<FormCategory />} />

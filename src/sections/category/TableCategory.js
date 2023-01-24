@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import '../../style.css'
@@ -16,6 +16,7 @@ export default function TableCategory() {
   ]
 
   const [data, setData] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const navigate = useNavigate()
   const onEdit = id => {
@@ -23,21 +24,23 @@ export default function TableCategory() {
   }
 
   //BtnDelete
-  const onDel = id => {
-    Delete(`category/${id}`).then(res => {
-      if (res) {
-        toast.success('Category Deleted')
-        getDataCat()
-      }
-    })
+  const onDel = async id => {
+    setIsLoading(true)
+    const res = await Delete(`category/${id}`)
+    if (res) {
+      toast.success('Category Deleted')
+      getDataCat()
+    }
+    setIsLoading(false)
   }
 
-  const getDataCat = () => {
-    GetAll('category').then(res => {
-      if (res) {
-        setData(res)
-      }
-    })
+  const getDataCat = async () => {
+    setIsLoading(true)
+    const res = await GetAll(`category`)
+    if (res) {
+      setData(res)
+    }
+    setIsLoading(false)
   }
 
   //Initial Data

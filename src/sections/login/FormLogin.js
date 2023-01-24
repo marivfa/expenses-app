@@ -1,31 +1,31 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import '../../style.css'
+import { useState } from 'react'
 
 import { useForm } from 'react-hook-form'
 import FormForgotPassword from './FormForgotPassword'
 import FormCreate from './FormCreate'
 
-import { Auth, Cache } from 'aws-amplify'
+import '../../style.css'
+
+import { Auth } from 'aws-amplify'
 
 export default function FormLogin({ setToken }) {
   const [login, setLogin] = useState(true)
   const [forgotPass, setForgotPass] = useState(false)
   const [create, setCreate] = useState(false)
   const [isLoading, setLoading] = useState(false)
+  const [error, setError] = useState()
 
   const {
     register,
     formState: { errors },
     handleSubmit,
-    setValue,
   } = useForm()
 
   const onSubmit = async data => {
     setLoading(true)
+    setError()
     try {
       const user = await Auth.signIn(data.username, data.password)
-      //console.log(user)
       const profileTmp = {
         attributes: JSON.stringify(user.attributes),
         token: user.signInUserSession.idToken.jwtToken,
@@ -34,11 +34,12 @@ export default function FormLogin({ setToken }) {
       setToken(profileTmp)
       setLoading(false)
 
-      /*setTimeout(function () {
+      setTimeout(function () {
         window.location.reload()
-      }, 1000)*/
+      }, 1000)
     } catch (error) {
-      console.log('error signing in', error)
+      setError(error.message)
+      setLoading(false)
     }
   }
 
@@ -56,6 +57,13 @@ export default function FormLogin({ setToken }) {
     setForgotPass(false)
   }
 
+  const onClickLogin = e => {
+    e.preventDefault()
+    setLogin(true)
+    setCreate(false)
+    setForgotPass(false)
+  }
+
   return (
     <div>
       <div>
@@ -67,14 +75,22 @@ export default function FormLogin({ setToken }) {
             <h6 className="m-0 font-weight-bold text-primary">Login</h6>
           </div>
           <div className="card-body">
+            <h6 className="m-0 font-weight-bold text-danger">{error}</h6>
+            <hr />
             <form className="user" onSubmit={handleSubmit(onSubmit)}>
               <div className="form-group">
                 <input
-                  type="text"
+                  type="email"
                   className="form-control"
                   name="Username"
                   placeholder="Username"
-                  {...register('username', { required: true })}
+                  {...register('username', {
+                    required: true,
+                    pattern: {
+                      value: /\S+@\S+\.\S+/,
+                      message: 'Entered value does not match email format',
+                    },
+                  })}
                 />
                 <span className="form-error">
                   {errors.username && 'Username is required'}
@@ -86,7 +102,13 @@ export default function FormLogin({ setToken }) {
                   className="form-control"
                   name="Password"
                   placeholder="Password"
-                  {...register('password', { required: true })}
+                  {...register('password', {
+                    required: true,
+                    minLength: {
+                      value: 8,
+                      message: 'min length is 8',
+                    },
+                  })}
                 />
                 <span className="form-error">
                   {errors.password && 'Password is required'}
@@ -125,8 +147,18 @@ export default function FormLogin({ setToken }) {
           </div>
         </div>
       )}
-      {forgotPass && <FormForgotPassword />}
-      {create && <FormCreate />}
+      {forgotPass && (
+        <FormForgotPassword
+          onClickCreate={onClickCreate}
+          onClickLogin={onClickLogin}
+        />
+      )}
+      {create && (
+        <FormCreate
+          onClickForgotPass={onClickForgotPass}
+          onClickLogin={onClickLogin}
+        />
+      )}
     </div>
   )
 }

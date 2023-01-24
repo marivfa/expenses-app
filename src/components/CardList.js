@@ -1,39 +1,7 @@
-import React, { useEffect, useState } from 'react'
 import Badge from 'react-bootstrap/Badge'
 import ListGroup from 'react-bootstrap/ListGroup'
-import { GetAll } from '../commons/Api'
 
-export default function CardList() {
-  const [data, setData] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    asyncFetch()
-  }, [])
-
-  const asyncFetch = () => {
-    setIsLoading(true)
-    GetAll(`dashboard/by_category`).then(
-      res => {
-        let arrTMP = []
-        Object.entries(res).forEach(([key, value]) => {
-          let obj = {
-            category: key,
-            amount: value,
-          }
-          arrTMP.push(obj)
-        })
-
-        setData(arrTMP)
-
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-      }
-    )
-  }
-
+export default function CardList({ data }) {
   const listItem = data?.map((data, index) => {
     return (
       <ListGroup.Item
@@ -54,7 +22,11 @@ export default function CardList() {
 
   return (
     <div>
-      <ListGroup as="ol">{listItem}</ListGroup>
+      {data.length > 0 ? (
+        <ListGroup as="ol">{listItem}</ListGroup>
+      ) : (
+        <h5>No remainders to show</h5>
+      )}
     </div>
   )
 }

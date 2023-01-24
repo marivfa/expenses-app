@@ -1,8 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../../style.css'
-
-import Table from '../../components/Table'
+import TableExpenses from './TableExpenses'
 
 export default function MainExpenses() {
   const navigate = useNavigate()
@@ -22,7 +21,7 @@ export default function MainExpenses() {
         </button>
       </div>
       <hr />
-      <Table />
+      <TableExpenses />
     </div>
   )
 }

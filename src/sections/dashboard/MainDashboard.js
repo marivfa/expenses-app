@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { GetAll } from '../../commons/Api'
 import CardList from '../../components/CardList'
 import Card from '../../components/Card'
@@ -9,37 +9,72 @@ import '../../style.css'
 
 export default function MainExpenses() {
   const [data, setData] = useState([])
+  const [line, setLine] = useState([])
+  const [column, setColumn] = useState([])
+  const [pie, setPie] = useState([])
+  const [remainders, setRemainders] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    getResumen()
+    getResume()
+    getLineData()
+    getColumnData()
+    getPieData()
   }, [])
 
-  const getResumen = () => {
+  const getResume = async () => {
     setIsLoading(true)
-    GetAll(`dashboard/resumen`).then(
-      res => {
-        setData(res)
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-      }
-    )
+    const res = await GetAll(`dashboard/resumen`)
+    if (res) {
+      setData(res)
+    }
+    setIsLoading(false)
   }
 
-  const getRemainders = () => {
+  const getLineData = async () => {
     setIsLoading(true)
-    GetAll(`dashboard/resumen`).then(
-      res => {
-        setData(res)
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-      }
-    )
+    const res = await GetAll(`dashboard/by_month`)
+    if (res) {
+      setLine(res)
+    }
+    setIsLoading(false)
   }
+
+  const getColumnData = async () => {
+    setIsLoading(true)
+    const res = await GetAll(`dashboard/by_category`)
+    if (res) {
+      let arrTMP = []
+      Object.entries(res).forEach(([key, value]) => {
+        let obj = {
+          category: key,
+          amount: value,
+        }
+        arrTMP.push(obj)
+      })
+      setColumn(arrTMP)
+    }
+    setIsLoading(false)
+  }
+
+  const getPieData = async () => {
+    setIsLoading(true)
+    const res = await GetAll(`dashboard/by_type`)
+    if (res) {
+      let arrTMP = []
+      Object.entries(res).forEach(([key, value]) => {
+        let obj = {
+          type: key,
+          value: value,
+        }
+        arrTMP.push(obj)
+      })
+      setPie(arrTMP)
+    }
+    setIsLoading(false)
+  }
+
+  const getRemainders = () => {}
 
   return (
     <div>
@@ -82,7 +117,7 @@ export default function MainExpenses() {
             </div>
             <div className="card-body">
               <div className="chart-area">
-                <LinePlot />
+                <LinePlot data={line} />
               </div>
             </div>
           </div>
@@ -110,7 +145,7 @@ export default function MainExpenses() {
                 </button>
               </div>
               <hr></hr>
-              <CardList />
+              <CardList data={remainders} />
             </div>
           </div>
         </div>
@@ -126,7 +161,7 @@ export default function MainExpenses() {
             </div>
             <div className="card-body">
               <div className="chart-area">
-                <ColumnPlot />
+                <ColumnPlot data={column} />
               </div>
             </div>
           </div>
@@ -141,7 +176,7 @@ export default function MainExpenses() {
             </div>
             <div className="card-body">
               <div className="chart-area">
-                <PiePlot />
+                <PiePlot data={pie} />
               </div>
             </div>
           </div>
