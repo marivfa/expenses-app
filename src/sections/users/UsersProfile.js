@@ -76,6 +76,8 @@ export default function UsersProfile() {
     )
   })
 
+  const onClickChangePass = () => {}
+
   return (
     <div>
       <div className="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -175,15 +177,14 @@ export default function UsersProfile() {
 
             <div className="row form-group">
               <div className="col-sm-4">
-                <input
-                  type="password"
-                  className="form-control"
-                  name="password"
-                  placeholder="Password"
-                />
-                <span className="form-error">
-                  {errors.password && 'Password is required'}
-                </span>
+                <a
+                  className="small"
+                  href="#"
+                  role="button"
+                  onClick={onClickChangePass}
+                >
+                  Change Password
+                </a>
               </div>
             </div>
 

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import Autocomplete from '../../components/Autocomplete'
+
+import { Select } from '@mantine/core'
+
 import '../../style.css'
 
 import { useForm } from 'react-hook-form'
@@ -17,7 +19,7 @@ export default function FormExpenses() {
     setValue,
   } = useForm()
 
-  const [categoryName, setCategoryName] = useState('')
+  const [categoryId, setCategoryId] = useState(0)
   const [category, setCategory] = useState([])
   const [showForm, setShowForm] = useState(false)
 
@@ -71,8 +73,8 @@ export default function FormExpenses() {
     if (res) {
       Object.entries(res).forEach(([key, value]) => {
         setValue(key, value)
-        if (key === 'category') {
-          setCategoryName(value)
+        if (key === 'id_category') {
+          setCategoryId(value)
         }
       })
     }
@@ -81,7 +83,17 @@ export default function FormExpenses() {
   const getCategory = async () => {
     const res = await GetAll('category')
     if (res) {
-      setCategory(res)
+      //setCategory(res)
+      let arrCategory = []
+      Object.entries(res).forEach(([key, value]) => {
+        let objTmp = {
+          value: value.id,
+          label: value.description,
+          group: value.type,
+        }
+        arrCategory.push(objTmp)
+      })
+      setCategory(arrCategory)
     }
   }
 
@@ -109,11 +121,15 @@ export default function FormExpenses() {
         <form className="user" onSubmit={handleSubmit(onSubmit)}>
           <div className="row form-group">
             <div className="col-sm-6">
-              <span> Select Category</span>
-              <Autocomplete
-                suggestions={category}
-                handleChangeForm={handleChangeForm}
-                categoryName={categoryName}
+              <Select
+                label="Select Category"
+                placeholder="Pick one"
+                searchable
+                nothingFound="No options"
+                radius="xl"
+                onChange={handleChangeForm}
+                value={categoryId}
+                data={category}
               />
               <span className="form-error">
                 {errors.category_id && 'Category is required'}
