@@ -5,12 +5,17 @@ import '../../style.css'
 import { useForm } from 'react-hook-form'
 
 import { toast } from 'react-toastify'
+
+import { Modal, Button, Group } from '@mantine/core'
+
 import { GetAll, Save } from '../../commons/Api'
 
 import countries from '../../data/countries.json'
+import ModalChangePass from '../../components/ModalChangePass'
 
 export default function UsersProfile() {
   const [isLoading, setIsLoading] = useState(true)
+  const [opened, setOpened] = useState(false)
 
   const navigate = useNavigate()
 
@@ -25,14 +30,15 @@ export default function UsersProfile() {
     setValue,
   } = useForm()
 
-  const onSubmit = data => {
-    Save(`users/me`, 'PUT', data).then(res => {
-      if (res) {
-        toast.success('Submitted successfully')
-      } else {
-        toast.error(`Form submit error ${res.error} `)
-      }
-    })
+  const onSubmit = async data => {
+    setIsLoading(true)
+    const res = await Save(`users/me`, 'PUT', data)
+    if (res) {
+      toast.success('Submitted successfully')
+    } else {
+      toast.error(`Form submit error ${res.error} `)
+    }
+    setIsLoading(false)
   }
 
   const onAddDelegate = () => {}
@@ -75,8 +81,6 @@ export default function UsersProfile() {
       </option>
     )
   })
-
-  const onClickChangePass = () => {}
 
   return (
     <div>
@@ -181,7 +185,7 @@ export default function UsersProfile() {
                   className="small"
                   href="#"
                   role="button"
-                  onClick={onClickChangePass}
+                  onClick={() => setOpened(true)}
                 >
                   Change Password
                 </a>
@@ -207,6 +211,7 @@ export default function UsersProfile() {
           </form>
         </div>
       </div>
+      <ModalChangePass opened={opened} setOpened={setOpened} />
     </div>
   )
 }
