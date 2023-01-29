@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import '../../style.css'
-import { faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { Table, Button} from '@mantine/core';
+import { Edit, Trash } from 'tabler-icons-react';
 import { Delete, GetAll } from '../../commons/Api'
 import { toast } from 'react-toastify'
 
-import { InfiniteScroll } from 'react-simple-infinite-scroll'
+import '../../style.css'
 
-const fontInfo = <FontAwesomeIcon icon={faInfoCircle} />
-const fontDel = <FontAwesomeIcon icon={faTrash} />
+import { InfiniteScroll } from 'react-simple-infinite-scroll'
 
 export default function TableRemainders() {
   const cols = [
@@ -18,17 +16,9 @@ export default function TableRemainders() {
     { header: 'Frecuency', field: 'frecuency', type: 'text' },
     { header: 'Remainder Date', field: 'remainder_date', type: 'text' },
     { header: 'Until Date', field: 'until_date', type: 'date' },
+    { header: '', field: '', type: '' },
   ]
 
-  const initParams = {
-    date_register: '',
-    category: '',
-    description: '',
-    frecuency: '',
-    until_date: '',
-    remainder_date: '',
-    user: '',
-  }
 
   const [items, setItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -87,21 +77,9 @@ export default function TableRemainders() {
         <td>{remainders.frecuency}</td>
         <td>{remainders.until_date}</td>
         <td>
-          <button
-            title="Edit"
-            className="btn btn-primary btn-circle btn-sm"
-            onClick={() => onEdit(remainders.id)}
-          >
-            {fontInfo}
-          </button>
+          <Button leftIcon={<Edit/>} onClick={() => onEdit(remainders.id)} color="blue" variant='subtle' compact></Button>
           &nbsp;
-          <button
-            title="Delete"
-            className="btn btn-danger btn-circle btn-sm"
-            onClick={() => onDel(remainders.id)}
-          >
-            {fontDel}
-          </button>
+          <Button leftIcon={<Trash/>} onClick={() => onDel(remainders.id)} color="red" variant='subtle' compact></Button>
         </td>
       </tr>
     )
@@ -125,7 +103,7 @@ export default function TableRemainders() {
             hasMore={!!cursor}
             onLoadMore={loadMore}
           >
-            <table className="table table-bordered">
+            <Table striped>
               <thead>
                 <tr>
                   {columns}
@@ -133,10 +111,10 @@ export default function TableRemainders() {
                 </tr>
               </thead>
               <tbody>{rows}</tbody>
-            </table>
+            </Table>
           </InfiniteScroll>
         </div>
-        {items.length > 0 && <h4>No more data to show</h4>}
+        {items.length > 0 && <div><hr /><h4>No more data to show</h4></div>}
       </div>
     </div>
   )

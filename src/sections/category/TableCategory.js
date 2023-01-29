@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import '../../style.css'
-import { faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { Table, Button} from '@mantine/core';
+import { Edit, Trash } from 'tabler-icons-react';
 import { Delete, GetAll } from '../../commons/Api'
 import { toast } from 'react-toastify'
+import '../../style.css'
 
-const fontInfo = <FontAwesomeIcon icon={faInfoCircle} />
-const fontDel = <FontAwesomeIcon icon={faTrash} />
 
 export default function TableCategory() {
   const cols = [
     { header: 'Description', field: 'description', type: 'text' },
     { header: 'Type', field: 'type', type: 'text' },
+    { header: '', field: '', type: '' },
   ]
 
   const [data, setData] = useState([])
@@ -54,22 +53,9 @@ export default function TableCategory() {
         <td>{category.description}</td>
         <td>{category.type}</td>
         <td>
+          <Button leftIcon={<Edit/>} onClick={() => onEdit(category.id)} color="blue" variant='subtle' compact></Button>
           &nbsp;
-          <button
-            title="Edit"
-            className="btn btn-primary btn-circle btn-sm"
-            onClick={() => onEdit(category.id)}
-          >
-            {fontInfo}
-          </button>
-          &nbsp;
-          <button
-            title="Delete"
-            className="btn btn-danger btn-circle btn-sm"
-            onClick={() => onDel(category.id)}
-          >
-            {fontDel}
-          </button>
+          <Button leftIcon={<Trash/>} onClick={() => onDel(category.id)} color="red" variant='subtle' compact></Button>
         </td>
       </tr>
     )
@@ -86,12 +72,7 @@ export default function TableCategory() {
       </div>
       <div className="card-body">
         <div className="table-responsive">
-          <table
-            className="table table-bordered"
-            id="dataTable"
-            width="100%"
-            cellSpacing="0"
-          >
+          <Table striped>
             <thead>
               <tr>
                 {columns}
@@ -99,7 +80,7 @@ export default function TableCategory() {
               </tr>
             </thead>
             <tbody>{rows}</tbody>
-          </table>
+          </Table>
         </div>
       </div>
     </div>

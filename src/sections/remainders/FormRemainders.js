@@ -4,6 +4,7 @@ import '../../style.css'
 
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
+import { Button } from '@mantine/core'
 import { GetAll, Save } from '../../commons/Api'
 
 export default function FormRemainders() {
@@ -31,8 +32,6 @@ export default function FormRemainders() {
   }
 
   const handleChange = e => {
-    //frecuency.onChange(e) // react hook form onChange
-    console.log('Here would go the my onChange') // my onChange
 
     setShowSelectDay(false)
     if (myValue === 'weekly') {
@@ -167,19 +166,10 @@ export default function FormRemainders() {
           </div>
           <hr />
           <div className="row form-group">
-            <div className="offset-sm-4 col-sm-2">
-              <button className="btn btn-primary btn-user btn-block">
-                Save
-              </button>
-            </div>
-            <div className="col-sm-2">
-              <button
-                className="btn btn-danger btn-user btn-block"
-                onClick={onCancel}
-              >
-                Cancel
-              </button>
-            </div>
+            <div className="offset-sm-4 col-sm-4">
+                <Button>Save</Button>&nbsp;
+                <Button onClick={onCancel} color="red">Cancel</Button>
+              </div>
           </div>
         </form>
       </div>

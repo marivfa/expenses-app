@@ -60,7 +60,10 @@ export default function ModalChangePass({ opened, setOpened }) {
                 className="form-control"
                 name="PreviousPassword"
                 placeholder="Old Password"
-                {...register('PreviousPassword', { required: true })}
+                {...register('PreviousPassword', { required: true ,minLength: {
+                  value: 8,
+                  message: 'min length is 8',
+                }})}
               />
               <span className="form-error">
                 {errors.PreviousPassword && 'Previous Password is required'}
@@ -74,7 +77,10 @@ export default function ModalChangePass({ opened, setOpened }) {
                 className="form-control"
                 name="ProposedPassword"
                 placeholder="New Password"
-                {...register('ProposedPassword', { required: true })}
+                {...register('ProposedPassword', { required: true, minLength: {
+                  value: 8,
+                  message: 'min length is 8',
+                } })}
               />
               <span className="form-error">
                 {errors.ProposedPassword && 'Proposed Password is required'}

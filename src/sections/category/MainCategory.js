@@ -1,5 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Button} from '@mantine/core';
+import { SquarePlus} from 'tabler-icons-react';
 import '../../style.css'
 import TableCategory from './TableCategory'
 
@@ -12,13 +14,9 @@ export default function MainCategory() {
   return (
     <div>
       <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-        <button
-          className="btn btn-primary me-md-2"
-          type="button"
-          onClick={onAdd}
-        >
-          New
-        </button>
+        <Button leftIcon={<SquarePlus/>} onClick={onAdd}>
+            New
+        </Button>
       </div>
       <hr />
       <TableCategory />

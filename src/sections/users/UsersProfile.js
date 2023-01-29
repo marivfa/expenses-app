@@ -1,21 +1,29 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import '../../style.css'
-
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-
 import { toast } from 'react-toastify'
+import { Button, Avatar} from '@mantine/core';
+import { UserPlus } from 'tabler-icons-react';
+import { Storage } from 'aws-amplify'
 
-import { Modal, Button, Group } from '@mantine/core'
 
 import { GetAll, Save } from '../../commons/Api'
 
 import countries from '../../data/countries.json'
 import ModalChangePass from '../../components/ModalChangePass'
+import '../../style.css'
+import ModalDelegate from './ModalDelegate';
 
 export default function UsersProfile() {
   const [isLoading, setIsLoading] = useState(true)
   const [opened, setOpened] = useState(false)
+  const [openedDelegate, setOpenedDelegate] = useState(false)
+  const [emailUser, setEmailUser] = useState('')
+  const [imageExist, setImageExist] = useState(null);
+  const [error, setError] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
+  const imgDefaultd = '../img/undraw_profile.svg'
+
 
   const navigate = useNavigate()
 
@@ -41,7 +49,6 @@ export default function UsersProfile() {
     setIsLoading(false)
   }
 
-  const onAddDelegate = () => {}
 
   const getUser = async () => {
     setIsLoading(true)
@@ -49,15 +56,59 @@ export default function UsersProfile() {
     if (res) {
       Object.entries(res).forEach(([key, value]) => {
         setValue(key, value)
+        if(key === 'email'){
+          setEmailUser(value)
+        }
       })
     }
     setIsLoading(false)
   }
 
+  const uploadPhoto = async(e) =>{
+    const file = e.target.files[0];
+    const new_file = new File([file], emailUser,{type: file.type})
+    setIsLoading(true)
+    try {
+      const res = await Storage.put(new_file.name, new_file, {
+        contentType: "image/png", // contentType is optional
+      });
+      if(res){ console.log(res)
+        setImageExist(true)
+      }
+    } catch (error) {
+      console.log("Error uploading file: ", error); 
+    }
+    setIsLoading(false)
+  }
+
+  const checkImageExist = async () => {
+    if(!emailUser) return
+    const resp= await Storage.get( emailUser, {
+      level: 'public', 
+      download: true,
+      contentType: ' "image/png"'
+    });
+    let image = new Image();
+    image.src = URL.createObjectURL(resp.Body);
+    setImageUrl(image.src);
+  }
+
+
   //Initial Data
-  useEffect(() => {
-    getUser()
+  useEffect(() => {    
+    const fetchData = async () => {
+      // get the data from the api
+       await getUser()       
+    }
+    fetchData()
+    //   
   }, [])
+
+  useEffect(() => {    
+    checkImageExist()             
+    //   
+  }, [emailUser])
+
 
   const onChange = e => {
     let index = e.target.selectedIndex
@@ -85,13 +136,9 @@ export default function UsersProfile() {
   return (
     <div>
       <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-        <button
-          className="btn btn-primary me-md-2"
-          type="button"
-          onClick={onAddDelegate}
-        >
-          Add Delegate
-        </button>
+        <Button leftIcon={<UserPlus/>} onClick={() => setOpenedDelegate(true)}>
+         Delegate
+        </Button>
       </div>
       <hr />
       <div className="card shadow mb-4">
@@ -99,13 +146,9 @@ export default function UsersProfile() {
           <h6 className="m-0 font-weight-bold text-primary">My account</h6>
         </div>
         <div className="card-body">
-          <form className="user" onSubmit={handleSubmit(onSubmit)}>
-            <div className="row form-group">
+           <div className="row form-group">
               <div className="col-sm-1">
-                <img
-                  className="img-profile rounded-circle"
-                  src="../img/undraw_profile.svg"
-                />
+                <Avatar radius="xl" size="xl" src={imageUrl ? imageUrl : imgDefaultd } />
               </div>
             </div>
             <div className="row form-group">
@@ -115,10 +158,11 @@ export default function UsersProfile() {
                   className="form-control"
                   name="photo"
                   placeholder="Upload Photo"
+                  onChange={uploadPhoto}
                 />
               </div>
             </div>
-
+            <form className="user" onSubmit={handleSubmit(onSubmit)}>
             <div className="row form-group">
               <div className="col-sm-4">
                 <input
@@ -138,14 +182,14 @@ export default function UsersProfile() {
                   className="form-control"
                   name="name"
                   placeholder="Name"
-                  {...register('name', { required: true })}
+                  {...register('name', { required: true, disabled: true })}
                 />
                 <span className="form-error">
                   {errors.name && 'name is required'}
                 </span>
               </div>
             </div>
-
+          
             <div className="row form-group">
               <div className="col-sm-4">
                 <select
@@ -194,24 +238,16 @@ export default function UsersProfile() {
 
             <hr />
             <div className="row form-group">
-              <div className="offset-sm-4 col-sm-2">
-                <button className="btn btn-primary btn-user btn-block">
-                  Save
-                </button>
-              </div>
-              <div className="col-sm-2">
-                <button
-                  className="btn btn-danger btn-user btn-block"
-                  onClick={onCancel}
-                >
-                  Cancel
-                </button>
-              </div>
+              <div className="offset-sm-4 col-sm-4">
+              <Button>Save</Button>&nbsp;
+              <Button onClick={onCancel} color="red">Cancel</Button>
+            </div>
             </div>
           </form>
         </div>
       </div>
       <ModalChangePass opened={opened} setOpened={setOpened} />
+      <ModalDelegate opened={openedDelegate} setOpened={setOpenedDelegate}/>
     </div>
   )
 }

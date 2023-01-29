@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import '../../style.css'
-import { faInfoCircle, faTrash } from '@fortawesome/free-solid-svg-icons'
-import { Delete, GetAll } from '../../commons/Api'
+import { Table, Button} from '@mantine/core';
+import { FileSpreadsheet, Edit, Trash } from 'tabler-icons-react';
 import { toast } from 'react-toastify'
-
 import { InfiniteScroll } from 'react-simple-infinite-scroll'
+import { Delete, GetAll } from '../../commons/Api'
 
-const fontInfo = <FontAwesomeIcon icon={faInfoCircle} />
-const fontDel = <FontAwesomeIcon icon={faTrash} />
+import '../../style.css'
+
 
 export default function TableExpenses() {
   const cols = [
@@ -19,14 +17,8 @@ export default function TableExpenses() {
     { header: 'Real Date', field: 'real_date', type: 'text' },
     { header: 'Comment', field: 'comment', type: 'text' },
     { header: 'User', field: 'user', type: 'date' },
+    { header: '', field: '', type: '' },
   ]
-
-  const initParams = {
-    date_register: '',
-    category: '',
-    amount: '',
-    user: '',
-  }
 
   const [items, setItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -51,23 +43,31 @@ export default function TableExpenses() {
     })
   }
 
-  const loadMore = () => {
+  const loadMore = async () => {
     setIsDelete(false)
     setIsLoading(true)
-    setError(undefined)
 
-    GetAll(`expenses?limit=20&offset=${cursor}`).then(
-      res => {
+    const res = await GetAll(`expenses?limit=20&offset=${cursor}`)
+      if(res){
         setItems([...items, ...res.items])
         setCursor(res.offset + 10)
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-        setError(error)
+        
       }
-    )
+      setIsLoading(false)
   }
+
+  const onExcel = async() => {
+    const res = await GetAll(`expenses/xls`)
+      if(res){
+        const link = document.createElement("a");
+        link.target = "_blank";
+        link.href = res.url;
+        link.click();
+      }else{
+        toast.error(`${res.error} `)
+      }
+  }
+
 
   useEffect(() => {
     loadMore()
@@ -87,21 +87,9 @@ export default function TableExpenses() {
         <td>{expenses.comment}</td>
         <td>{expenses.user}</td>
         <td>
-          <button
-            title="Edit"
-            className="btn btn-primary btn-circle btn-sm"
-            onClick={() => onEdit(expenses.id)}
-          >
-            {fontInfo}
-          </button>
+          <Button leftIcon={<Edit/>} onClick={() => onEdit(expenses.id)} color="blue" variant='subtle' compact></Button>
           &nbsp;
-          <button
-            title="Delete"
-            className="btn btn-danger btn-circle btn-sm"
-            onClick={() => onDel(expenses.id)}
-          >
-            {fontDel}
-          </button>
+          <Button leftIcon={<Trash/>} onClick={() => onDel(expenses.id)} color="red" variant='subtle' compact></Button>
         </td>
       </tr>
     )
@@ -125,7 +113,7 @@ export default function TableExpenses() {
             hasMore={!!cursor}
             onLoadMore={loadMore}
           >
-            <table className="table table-bordered">
+            <Table striped>
               <thead>
                 <tr>
                   {columns}
@@ -133,10 +121,15 @@ export default function TableExpenses() {
                 </tr>
               </thead>
               <tbody>{rows}</tbody>
-            </table>
+            </Table>
           </InfiniteScroll>
         </div>
-        {items.length > 0 && <h4>No more data to show</h4>}
+        {items.length > 0 && <div><hr />
+          <h4>No more data to show</h4>
+          <Button leftIcon={<FileSpreadsheet/>} onClick={() => onExcel()} variant="white">
+            Download
+          </Button>
+         </div>}
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { Select } from '@mantine/core'
+import { Select, Button } from '@mantine/core'
 
 import '../../style.css'
 
@@ -30,6 +30,7 @@ export default function FormExpenses() {
   }
 
   const handleChangeForm = id => {
+    setCategoryId(id)
     setValue('id_category', id, {
       shouldValidate: true,
     })
@@ -128,8 +129,8 @@ export default function FormExpenses() {
                 nothingFound="No options"
                 radius="xl"
                 onChange={handleChangeForm}
-                value={categoryId}
                 data={category}
+                value={categoryId}
               />
               <span className="form-error">
                 {errors.category_id && 'Category is required'}
@@ -250,18 +251,9 @@ export default function FormExpenses() {
 
           <hr />
           <div className="row form-group">
-            <div className="offset-sm-4 col-sm-2">
-              <button className="btn btn-primary btn-user btn-block">
-                Save
-              </button>
-            </div>
-            <div className="col-sm-2">
-              <button
-                className="btn btn-danger btn-user btn-block"
-                onClick={onCancel}
-              >
-                Cancel
-              </button>
+            <div className="offset-sm-4 col-sm-4">
+              <Button>Save</Button>&nbsp;
+              <Button onClick={onCancel} color="red">Cancel</Button>
             </div>
           </div>
         </form>

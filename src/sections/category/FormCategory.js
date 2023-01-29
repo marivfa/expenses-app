@@ -4,6 +4,7 @@ import '../../style.css'
 
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
+import { Button } from '@mantine/core'
 import { GetAll, Save } from '../../commons/Api'
 
 export default function FormCategory() {
@@ -97,18 +98,9 @@ export default function FormCategory() {
           </div>
           <hr />
           <div className="row form-group">
-            <div className="offset-sm-4 col-sm-2">
-              <button className="btn btn-primary btn-user btn-block">
-                Save
-              </button>
-            </div>
-            <div className="col-sm-2">
-              <button
-                className="btn btn-danger btn-user btn-block"
-                onClick={onCancel}
-              >
-                Cancel
-              </button>
+            <div className="offset-sm-4 col-sm-4">
+              <Button>Save</Button>&nbsp;
+              <Button onClick={onCancel} color="red">Cancel</Button>
             </div>
           </div>
         </form>

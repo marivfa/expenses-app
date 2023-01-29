@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { Graph, Category, ReportMoney, Alarm } from 'tabler-icons-react';
 import '../style.css'
 
 import MainExpenses from '../sections/expenses/MainExpenses'
@@ -12,21 +13,25 @@ const items = [
     path: '/dashboard',
     text: 'Home',
     comp: MainDashboard,
+    icon: Graph
   },
   {
     path: '/category',
     text: 'Category',
     comp: MainCategory,
+    icon: Category
   },
   {
     path: '/expenses',
     text: 'Expenses',
     comp: MainExpenses,
+    icon: ReportMoney
   },
   {
     path: '/remainders',
     text: 'Remainders',
     comp: MainRemainders,
+    icon: Alarm
   },
 ]
 
@@ -35,7 +40,7 @@ export default function NavBar() {
     return (
       <li className="nav-item" key={item.path}>
         <Link className="nav-link" to={item.path}>
-          {item.text}
+          <item.icon/> {item.text}
         </Link>
       </li>
     )

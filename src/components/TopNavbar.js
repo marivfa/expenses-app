@@ -1,6 +1,7 @@
 import React from 'react'
 import Nav from 'react-bootstrap/Nav'
 import NavDropdown from 'react-bootstrap/NavDropdown'
+import { User, Logout } from 'tabler-icons-react';
 import '../style.css'
 
 export default function TopNavbar({ signOut }) {
@@ -33,11 +34,11 @@ export default function TopNavbar({ signOut }) {
             id="basic-nav-dropdown"
           >
             <NavDropdown.Item eventKey={1.1} href="/profile">
-              Profile
+              <User/> Profile
             </NavDropdown.Item>
             <NavDropdown.Divider />
             <NavDropdown.Item eventKey={1.3} onClick={signOut}>
-              <i className="fa fa-sign-out"></i> Logout
+              <Logout/> Logout
             </NavDropdown.Item>
           </NavDropdown>
         </Nav>
