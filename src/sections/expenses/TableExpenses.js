@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Table, Button} from '@mantine/core';
-import { FileSpreadsheet, Edit, Trash } from 'tabler-icons-react';
+import { Table, Button, LoadingOverlay } from '@mantine/core'
+import { FileSpreadsheet, Edit, Trash } from 'tabler-icons-react'
 import { toast } from 'react-toastify'
 import { InfiniteScroll } from 'react-simple-infinite-scroll'
 import { Delete, GetAll } from '../../commons/Api'
 
 import '../../style.css'
-
 
 export default function TableExpenses() {
   const cols = [
@@ -23,7 +22,6 @@ export default function TableExpenses() {
   const [items, setItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [cursor, setCursor] = useState(0)
-  const [error, setError] = useState()
   const [isDelete, setIsDelete] = useState(false)
 
   const navigate = useNavigate()
@@ -48,26 +46,24 @@ export default function TableExpenses() {
     setIsLoading(true)
 
     const res = await GetAll(`expenses?limit=20&offset=${cursor}`)
-      if(res){
-        setItems([...items, ...res.items])
-        setCursor(res.offset + 10)
-        
-      }
-      setIsLoading(false)
+    if (res) {
+      setItems([...items, ...res.items])
+      setCursor(res.offset + 10)
+    }
+    setIsLoading(false)
   }
 
-  const onExcel = async() => {
+  const onExcel = async () => {
     const res = await GetAll(`expenses/xls`)
-      if(res){
-        const link = document.createElement("a");
-        link.target = "_blank";
-        link.href = res.url;
-        link.click();
-      }else{
-        toast.error(`${res.error} `)
-      }
+    if (res) {
+      const link = document.createElement('a')
+      link.target = '_blank'
+      link.href = res.url
+      link.click()
+    } else {
+      toast.error(`${res.error} `)
+    }
   }
-
 
   useEffect(() => {
     loadMore()
@@ -87,9 +83,21 @@ export default function TableExpenses() {
         <td>{expenses.comment}</td>
         <td>{expenses.user}</td>
         <td>
-          <Button leftIcon={<Edit/>} onClick={() => onEdit(expenses.id)} color="blue" variant='subtle' compact></Button>
+          <Button
+            leftIcon={<Edit />}
+            onClick={() => onEdit(expenses.id)}
+            color="blue"
+            variant="subtle"
+            compact
+          ></Button>
           &nbsp;
-          <Button leftIcon={<Trash/>} onClick={() => onDel(expenses.id)} color="red" variant='subtle' compact></Button>
+          <Button
+            leftIcon={<Trash />}
+            onClick={() => onDel(expenses.id)}
+            color="red"
+            variant="subtle"
+            compact
+          ></Button>
         </td>
       </tr>
     )
@@ -106,6 +114,11 @@ export default function TableExpenses() {
       </div>
       <div className="card-body">
         <div className="table-responsive">
+          <LoadingOverlay
+            visible={isLoading}
+            overlayBlur={2}
+            transitionDuration={500}
+          />
           <InfiniteScroll
             throttle={64}
             threshold={200}
@@ -124,12 +137,19 @@ export default function TableExpenses() {
             </Table>
           </InfiniteScroll>
         </div>
-        {items.length > 0 && <div><hr />
-          <h4>No more data to show</h4>
-          <Button leftIcon={<FileSpreadsheet/>} onClick={() => onExcel()} variant="white">
-            Download
-          </Button>
-         </div>}
+        {items.length > 0 && (
+          <div>
+            <hr />
+            <h4>No more data to show</h4>
+            <Button
+              leftIcon={<FileSpreadsheet />}
+              onClick={() => onExcel()}
+              variant="white"
+            >
+              Download
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )

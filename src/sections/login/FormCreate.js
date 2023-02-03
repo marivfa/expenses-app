@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-
+import { Button, Flex } from '@mantine/core'
 import { Auth } from 'aws-amplify'
 import FormCode from './FormCode'
 
@@ -10,6 +10,7 @@ export default function FormCreate({ onClickForgotPass, onClickLogin }) {
   const [create, setCreate] = useState(true)
   const [userdata, setUserdata] = useState([])
   const [error, setError] = useState()
+  const [isLoading, setLoading] = useState(false)
 
   const {
     register,
@@ -19,6 +20,7 @@ export default function FormCreate({ onClickForgotPass, onClickLogin }) {
 
   const onSubmit = async data => {
     setError()
+    setLoading(true)
     try {
       await Auth.signUp({
         username: data.email,
@@ -39,6 +41,7 @@ export default function FormCreate({ onClickForgotPass, onClickLogin }) {
     } catch (error) {
       setError(error.message)
     }
+    setLoading(false)
   }
 
   return (
@@ -104,15 +107,23 @@ export default function FormCreate({ onClickForgotPass, onClickLogin }) {
                 </span>
               </div>
               <hr />
-              <div className="offset-sm-4 col-sm-4">
-                <button className="btn btn-primary btn-user btn-block">
+              <Flex
+                mih={50}
+                gap="md"
+                justify="center"
+                align="center"
+                direction="row"
+                wrap="wrap"
+              >
+                <Button type="submit" loading={isLoading}>
                   Register Account
-                </button>
-              </div>
+                </Button>
+              </Flex>
+
               <div className="text-center">
                 <a
                   className="small"
-                  href="#"
+                  href="/"
                   role="button"
                   onClick={onClickForgotPass}
                 >
@@ -122,7 +133,7 @@ export default function FormCreate({ onClickForgotPass, onClickLogin }) {
               <div className="text-center">
                 <a
                   className="small"
-                  href="#"
+                  href="/"
                   role="button"
                   onClick={onClickLogin}
                 >

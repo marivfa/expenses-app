@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { Select, Button } from '@mantine/core'
+import { Select, Button, Flex } from '@mantine/core'
 
 import '../../style.css'
 
@@ -22,6 +22,7 @@ export default function FormExpenses() {
   const [categoryId, setCategoryId] = useState(0)
   const [category, setCategory] = useState([])
   const [showForm, setShowForm] = useState(false)
+  const [isLoading, setLoading] = useState(false)
 
   const navigate = useNavigate()
 
@@ -42,6 +43,7 @@ export default function FormExpenses() {
 
   //Save Expenses
   const onSubmit = async data => {
+    setLoading(true)
     const method = id ? 'PUT' : 'POST'
     //delete data.id
     //delete data.status
@@ -67,6 +69,7 @@ export default function FormExpenses() {
     } else {
       toast.error(`Form submit error ${res.error} `)
     }
+    setLoading(false)
   }
 
   const getExpenses = async () => {
@@ -250,12 +253,21 @@ export default function FormExpenses() {
           )}
 
           <hr />
-          <div className="row form-group">
-            <div className="offset-sm-4 col-sm-4">
-              <Button>Save</Button>&nbsp;
-              <Button onClick={onCancel} color="red">Cancel</Button>
-            </div>
-          </div>
+          <Flex
+            mih={50}
+            gap="md"
+            justify="center"
+            align="center"
+            direction="row"
+            wrap="wrap"
+          >
+            <Button type="submit" loading={isLoading}>
+              Save
+            </Button>
+            <Button onClick={onCancel} color="red">
+              Cancel
+            </Button>
+          </Flex>
         </form>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
-
 import { useForm } from 'react-hook-form'
+import { Button } from '@mantine/core'
 import FormForgotPassword from './FormForgotPassword'
 import FormCreate from './FormCreate'
 
@@ -14,6 +14,7 @@ export default function FormLogin({ setToken }) {
   const [create, setCreate] = useState(false)
   const [isLoading, setLoading] = useState(false)
   const [error, setError] = useState()
+  const [msj, setMsj] = useState('')
 
   const {
     register,
@@ -26,17 +27,30 @@ export default function FormLogin({ setToken }) {
     setError()
     try {
       const user = await Auth.signIn(data.username, data.password)
-      const profileTmp = {
-        attributes: JSON.stringify(user.attributes),
-        token: user.signInUserSession.idToken.jwtToken,
-        profile: user.attributes.profile,
+
+      if (user.challengeName === 'NEW_PASSWORD_REQUIRED') {
+        const res = await Auth.completeNewPassword(
+          user, // the Cognito User Object
+          data.password
+        )
+        if (res) {
+          setMsj(
+            'This is your first login, you have successfully confirm your password.'
+          )
+        }
+      } else {
+        const profileTmp = {
+          attributes: JSON.stringify(user.attributes),
+          token: user.signInUserSession.idToken.jwtToken,
+          profile: user.attributes.profile,
+        }
+        setToken(profileTmp)
       }
-      setToken(profileTmp)
-      setLoading(false)
 
       setTimeout(function () {
         window.location.reload()
       }, 1000)
+      setLoading(false)
     } catch (error) {
       setError(error.message)
       setLoading(false)
@@ -75,7 +89,14 @@ export default function FormLogin({ setToken }) {
             <h6 className="m-0 font-weight-bold text-primary">Login</h6>
           </div>
           <div className="card-body">
-            <h6 className="m-0 font-weight-bold text-danger">{error}</h6>
+            <h6
+              className={`m-0 font-weight-bold ${error && 'text-danger'} ${
+                msj && 'text-success'
+              }`}
+            >
+              {error}
+              {msj}
+            </h6>
             <hr />
             <form className="user" onSubmit={handleSubmit(onSubmit)}>
               <div className="form-group">
@@ -115,18 +136,15 @@ export default function FormLogin({ setToken }) {
                 </span>
               </div>
               <hr />
-              <div className="offset-sm-4 col-sm-4">
-                <button
-                  className="btn btn-primary btn-user btn-block"
-                  disabled={isLoading}
-                >
+              <div className="offset-sm-5 col-sm-4">
+                <Button type="submit" loading={isLoading}>
                   Login
-                </button>
+                </Button>
               </div>
               <div className="text-center">
                 <a
                   className="small"
-                  href="#"
+                  href="/"
                   role="button"
                   onClick={onClickForgotPass}
                 >
@@ -136,7 +154,7 @@ export default function FormLogin({ setToken }) {
               <div className="text-center">
                 <a
                   className="small"
-                  href="#"
+                  href="/"
                   role="button"
                   onClick={onClickCreate}
                 >

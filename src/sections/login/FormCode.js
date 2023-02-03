@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Auth } from 'aws-amplify'
-
+import { Button, Flex } from '@mantine/core'
 import { SaveUser } from '../../commons/Api'
 import '../../style.css'
 
 export default function FormCode({ userdata, onClickLogin, type }) {
   const [error, setError] = useState()
   const [msj, setMsj] = useState()
+  const [isLoading, setLoading] = useState(false)
   const {
     register,
     formState: { errors },
@@ -15,6 +16,7 @@ export default function FormCode({ userdata, onClickLogin, type }) {
   } = useForm()
 
   const onSubmit = async data => {
+    setLoading(true)
     try {
       if (type === 'create') {
         await Auth.confirmSignUp(userdata.username, data.code)
@@ -34,6 +36,7 @@ export default function FormCode({ userdata, onClickLogin, type }) {
     } catch (error) {
       setError(error.message)
     }
+    setLoading(false)
   }
 
   const onCreateUser = async token => {
@@ -110,15 +113,23 @@ export default function FormCode({ userdata, onClickLogin, type }) {
             )}
 
             <hr />
-            <div className="offset-sm-4 col-sm-4">
-              <button className="btn btn-primary btn-user btn-block">
+            <Flex
+              mih={50}
+              gap="md"
+              justify="center"
+              align="center"
+              direction="row"
+              wrap="wrap"
+            >
+              <Button type="submit" loading={isLoading}>
                 Send code
-              </button>
-            </div>
+              </Button>
+            </Flex>
+
             <div className="text-center">
               <a
                 className="small"
-                href="#"
+                href="/"
                 role="button"
                 onClick={onClickLogin}
               >

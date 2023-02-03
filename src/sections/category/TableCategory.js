@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Table, Button} from '@mantine/core';
-import { Edit, Trash } from 'tabler-icons-react';
+import { Table, Button, LoadingOverlay } from '@mantine/core'
+import { Edit, Trash } from 'tabler-icons-react'
 import { Delete, GetAll } from '../../commons/Api'
 import { toast } from 'react-toastify'
 import '../../style.css'
-
 
 export default function TableCategory() {
   const cols = [
@@ -53,9 +52,21 @@ export default function TableCategory() {
         <td>{category.description}</td>
         <td>{category.type}</td>
         <td>
-          <Button leftIcon={<Edit/>} onClick={() => onEdit(category.id)} color="blue" variant='subtle' compact></Button>
+          <Button
+            leftIcon={<Edit />}
+            onClick={() => onEdit(category.id)}
+            color="blue"
+            variant="subtle"
+            compact
+          ></Button>
           &nbsp;
-          <Button leftIcon={<Trash/>} onClick={() => onDel(category.id)} color="red" variant='subtle' compact></Button>
+          <Button
+            leftIcon={<Trash />}
+            onClick={() => onDel(category.id)}
+            color="red"
+            variant="subtle"
+            compact
+          ></Button>
         </td>
       </tr>
     )
@@ -72,6 +83,11 @@ export default function TableCategory() {
       </div>
       <div className="card-body">
         <div className="table-responsive">
+          <LoadingOverlay
+            visible={isLoading}
+            overlayBlur={2}
+            transitionDuration={500}
+          />
           <Table striped>
             <thead>
               <tr>

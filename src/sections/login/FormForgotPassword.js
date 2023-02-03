@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Auth } from 'aws-amplify'
-
+import { Button, Flex } from '@mantine/core'
 import FormCode from './FormCode'
 
 import '../../style.css'
@@ -10,6 +10,7 @@ export default function FormForgotPassword({ onClickCreate, onClickLogin }) {
   const [forgotPass, setForgotPass] = useState(true)
   const [userdata, setUserdata] = useState([])
   const [error, setError] = useState()
+  const [isLoading, setLoading] = useState(false)
   const {
     register,
     formState: { errors },
@@ -18,6 +19,7 @@ export default function FormForgotPassword({ onClickCreate, onClickLogin }) {
 
   const onSubmit = async data => {
     setError()
+    setLoading(true)
     try {
       await Auth.forgotPassword(data.username)
       setForgotPass(false)
@@ -25,6 +27,7 @@ export default function FormForgotPassword({ onClickCreate, onClickLogin }) {
     } catch (error) {
       setError(error.message)
     }
+    setLoading(false)
   }
 
   return (
@@ -59,15 +62,24 @@ export default function FormForgotPassword({ onClickCreate, onClickLogin }) {
                 </span>
               </div>
               <hr />
-              <div className="offset-sm-4 col-sm-4">
-                <button className="btn btn-primary btn-user btn-block">
+
+              <Flex
+                mih={50}
+                gap="md"
+                justify="center"
+                align="center"
+                direction="row"
+                wrap="wrap"
+              >
+                <Button type="submit" loading={isLoading}>
                   Reset Password
-                </button>
-              </div>
+                </Button>
+              </Flex>
+
               <div className="text-center">
                 <a
                   className="small"
-                  href="#"
+                  href="/"
                   role="button"
                   onClick={onClickCreate}
                 >
@@ -77,7 +89,7 @@ export default function FormForgotPassword({ onClickCreate, onClickLogin }) {
               <div className="text-center">
                 <a
                   className="small"
-                  href="#"
+                  href="/"
                   role="button"
                   onClick={onClickLogin}
                 >

@@ -4,7 +4,7 @@ import '../../style.css'
 
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import { Button } from '@mantine/core'
+import { Button, Flex } from '@mantine/core'
 import { GetAll, Save } from '../../commons/Api'
 
 export default function FormRemainders() {
@@ -24,6 +24,7 @@ export default function FormRemainders() {
   const [category, setCategory] = useState([])
   const [slcFrecuencyValue, setSlcFrecuencyValue] = useState()
   const [showSelectDay, setShowSelectDay] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const navigate = useNavigate()
 
@@ -32,7 +33,6 @@ export default function FormRemainders() {
   }
 
   const handleChange = e => {
-
     setShowSelectDay(false)
     if (myValue === 'weekly') {
       setShowSelectDay(!showSelectDay)
@@ -165,12 +165,21 @@ export default function FormRemainders() {
             </div>
           </div>
           <hr />
-          <div className="row form-group">
-            <div className="offset-sm-4 col-sm-4">
-                <Button>Save</Button>&nbsp;
-                <Button onClick={onCancel} color="red">Cancel</Button>
-              </div>
-          </div>
+          <Flex
+            mih={50}
+            gap="md"
+            justify="center"
+            align="center"
+            direction="row"
+            wrap="wrap"
+          >
+            <Button type="submit" loading={isLoading}>
+              Save
+            </Button>
+            <Button onClick={onCancel} color="red">
+              Cancel
+            </Button>
+          </Flex>
         </form>
       </div>
     </div>

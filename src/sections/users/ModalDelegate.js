@@ -1,27 +1,45 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-
+import { toast } from 'react-toastify'
 import { Modal, Button } from '@mantine/core'
 import { Save } from '../../commons/Api'
 
 import '../../style.css'
 
-export default function ModalDelegate({ opened, setOpened }) {
-  const [error, setError] = useState()
-  const [msj, setMsj] = useState()
+export default function ModalDelegate({
+  opened,
+  setOpened,
+  country,
+  currency,
+}) {
+  const [isLoading, setLoading] = useState(false)
 
   const {
     register,
     formState: { errors },
     handleSubmit,
+    reset,
   } = useForm()
 
   const onSubmit = async data => {
+    setLoading(true)
     data.type = 'delegate'
+    data.master_id = 0
+    data.active = 'Y'
+    data.country = country
+    data.currency = currency
     const res = await Save('users', 'POST', data)
     if (res) {
-      setMsj('User has been created successfully')
+      toast.success('User created successfully')
+
+      setTimeout(function () {
+        reset()
+        setOpened(false)
+      }, 1000)
+    } else {
+      toast.error(`Form submit error ${res.error} `)
     }
+    setLoading(false)
   }
 
   return (
@@ -33,18 +51,8 @@ export default function ModalDelegate({ opened, setOpened }) {
         withCloseButton={true}
         title="Add Delegate"
       >
-        <h6
-          className={`m-0 font-weight-bold ${error && 'text-danger'} ${
-            msj && 'text-success'
-          }`}
-        >
-          {error}
-          {msj}
-        </h6>
         <div className="card shadow mb-4">
           <div className="card-body">
-            <h6 className="m-0 font-weight-bold text-danger">{error}</h6>
-            <hr />
             <form className="user" onSubmit={handleSubmit(onSubmit)}>
               <div className="form-group">
                 <input
@@ -97,7 +105,9 @@ export default function ModalDelegate({ opened, setOpened }) {
               </div>
               <hr />
               <div className="offset-sm-4 col-sm-4">
-              <Button>Register</Button>
+                <Button type="submit" loading={isLoading}>
+                  Register
+                </Button>
               </div>
             </form>
           </div>

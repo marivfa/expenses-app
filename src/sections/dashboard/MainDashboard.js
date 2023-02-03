@@ -5,6 +5,7 @@ import Card from '../../components/Card'
 import ColumnPlot from '../../components/ColumnPlot'
 import LinePlot from '../../components/LinePlot'
 import PiePlot from '../../components/PiePlot'
+import { LoadingOverlay } from '@mantine/core'
 import '../../style.css'
 
 export default function MainExpenses() {
@@ -74,7 +75,7 @@ export default function MainExpenses() {
     setIsLoading(false)
   }
 
-  const getRemainders = () => {}
+  //const getRemainders = () => {}
 
   return (
     <div>
@@ -117,6 +118,11 @@ export default function MainExpenses() {
             </div>
             <div className="card-body">
               <div className="chart-area">
+                <LoadingOverlay
+                  visible={isLoading}
+                  overlayBlur={2}
+                  transitionDuration={500}
+                />
                 <LinePlot data={line} />
               </div>
             </div>
@@ -161,6 +167,11 @@ export default function MainExpenses() {
             </div>
             <div className="card-body">
               <div className="chart-area">
+                <LoadingOverlay
+                  visible={isLoading}
+                  overlayBlur={2}
+                  transitionDuration={500}
+                />
                 <ColumnPlot data={column} />
               </div>
             </div>
@@ -176,6 +187,11 @@ export default function MainExpenses() {
             </div>
             <div className="card-body">
               <div className="chart-area">
+                <LoadingOverlay
+                  visible={isLoading}
+                  overlayBlur={2}
+                  transitionDuration={500}
+                />
                 <PiePlot data={pie} />
               </div>
             </div>
