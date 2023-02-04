@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { GetAll } from '../../commons/Api'
 import CardList from '../../components/CardList'
 import Card from '../../components/Card'
 import ColumnPlot from '../../components/ColumnPlot'
 import LinePlot from '../../components/LinePlot'
 import PiePlot from '../../components/PiePlot'
+
+import { UsersContext } from '../../context/UsersContext'
+
 import { LoadingOverlay } from '@mantine/core'
 import '../../style.css'
-
 export default function MainExpenses() {
   const [data, setData] = useState([])
   const [line, setLine] = useState([])
@@ -15,6 +17,9 @@ export default function MainExpenses() {
   const [pie, setPie] = useState([])
   const [remainders, setRemainders] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+
+  const [currentUser, setCurrentUser] = useContext(UsersContext)
+  console.log('user_dashbo', currentUser)
 
   useEffect(() => {
     getResume()
@@ -28,6 +33,7 @@ export default function MainExpenses() {
     const res = await GetAll(`dashboard/resumen`)
     if (res) {
       setData(res)
+      console.log('here')
     }
     setIsLoading(false)
   }

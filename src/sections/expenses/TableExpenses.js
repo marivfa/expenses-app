@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Table, Button, LoadingOverlay } from '@mantine/core'
+import { Table, Button, LoadingOverlay, Flex } from '@mantine/core'
 import { FileSpreadsheet, Edit, Trash } from 'tabler-icons-react'
 import { toast } from 'react-toastify'
 import { InfiniteScroll } from 'react-simple-infinite-scroll'
 import { Delete, GetAll } from '../../commons/Api'
+import { UsersContext } from '../../context/UsersContext'
 
 import '../../style.css'
 
@@ -23,6 +24,8 @@ export default function TableExpenses() {
   const [isLoading, setIsLoading] = useState(true)
   const [cursor, setCursor] = useState(0)
   const [isDelete, setIsDelete] = useState(false)
+  const [currentUser, setCurrentUser] = useContext(UsersContext)
+  console.log(currentUser, 'tableexpenses')
 
   const navigate = useNavigate()
   const onEdit = id => {
@@ -83,21 +86,34 @@ export default function TableExpenses() {
         <td>{expenses.comment}</td>
         <td>{expenses.user}</td>
         <td>
-          <Button
-            leftIcon={<Edit />}
-            onClick={() => onEdit(expenses.id)}
-            color="blue"
-            variant="subtle"
-            compact
-          ></Button>
-          &nbsp;
-          <Button
-            leftIcon={<Trash />}
-            onClick={() => onDel(expenses.id)}
-            color="red"
-            variant="subtle"
-            compact
-          ></Button>
+          {currentUser &&
+            ((currentUser.type === 'delegate' &&
+              currentUser.id === expenses.id_user) ||
+              currentUser.type === 'admin') && (
+              <Flex
+                mih={50}
+                gap="xs"
+                justify="center"
+                align="center"
+                direction="row"
+                wrap="wrap"
+              >
+                <Button
+                  leftIcon={<Edit />}
+                  onClick={() => onEdit(expenses.id)}
+                  color="blue"
+                  variant="subtle"
+                  compact
+                ></Button>
+                <Button
+                  leftIcon={<Trash />}
+                  onClick={() => onDel(expenses.id)}
+                  color="red"
+                  variant="subtle"
+                  compact
+                ></Button>
+              </Flex>
+            )}
         </td>
       </tr>
     )

@@ -3,7 +3,6 @@ import { useForm } from 'react-hook-form'
 import { Button } from '@mantine/core'
 import FormForgotPassword from './FormForgotPassword'
 import FormCreate from './FormCreate'
-
 import '../../style.css'
 
 import { Auth } from 'aws-amplify'

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Table, Button, LoadingOverlay } from '@mantine/core'
+import { Table, Button, LoadingOverlay, Flex } from '@mantine/core'
 import { Edit, Trash } from 'tabler-icons-react'
 import { Delete, GetAll } from '../../commons/Api'
 import { toast } from 'react-toastify'
+import { UsersContext } from '../../context/UsersContext'
 import '../../style.css'
 
 export default function TableCategory() {
@@ -15,6 +16,8 @@ export default function TableCategory() {
 
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [currentUser, setCurrentUser] = useContext(UsersContext)
+  console.log(currentUser, 'tablecategory')
 
   const navigate = useNavigate()
   const onEdit = id => {
@@ -52,21 +55,34 @@ export default function TableCategory() {
         <td>{category.description}</td>
         <td>{category.type}</td>
         <td>
-          <Button
-            leftIcon={<Edit />}
-            onClick={() => onEdit(category.id)}
-            color="blue"
-            variant="subtle"
-            compact
-          ></Button>
-          &nbsp;
-          <Button
-            leftIcon={<Trash />}
-            onClick={() => onDel(category.id)}
-            color="red"
-            variant="subtle"
-            compact
-          ></Button>
+          {currentUser &&
+            ((currentUser.type === 'delegate' &&
+              currentUser.id === category.id_user) ||
+              currentUser.type === 'admin') && (
+              <Flex
+                mih={50}
+                gap="xs"
+                justify="center"
+                align="center"
+                direction="row"
+                wrap="wrap"
+              >
+                <Button
+                  leftIcon={<Edit />}
+                  onClick={() => onEdit(category.id)}
+                  color="blue"
+                  variant="subtle"
+                  compact
+                ></Button>
+                <Button
+                  leftIcon={<Trash />}
+                  onClick={() => onDel(category.id)}
+                  color="red"
+                  variant="subtle"
+                  compact
+                ></Button>
+              </Flex>
+            )}
         </td>
       </tr>
     )

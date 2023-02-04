@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
@@ -10,24 +10,28 @@ import { GetAll, Save } from '../../commons/Api'
 
 import countries from '../../data/countries.json'
 import ModalChangePass from '../../components/ModalChangePass'
-import '../../style.css'
 import ModalDelegate from './ModalDelegate'
+import { UsersContext } from '../../context/UsersContext'
+import '../../style.css'
 
 export default function UsersProfile() {
   const [isLoading, setIsLoading] = useState(true)
   const [opened, setOpened] = useState(false)
   const [openedDelegate, setOpenedDelegate] = useState(false)
-  const [emailUser, setEmailUser] = useState('')
+  const [idUser, setIdUser] = useState('')
   const [imageExist, setImageExist] = useState(null)
   const [error, setError] = useState(null)
   const [imageUrl, setImageUrl] = useState(null)
   const imgDefaultd = '../img/undraw_profile.svg'
+  const [currentUser, setCurrentUser] = useContext(UsersContext)
 
   const navigate = useNavigate()
 
   const onCancel = () => {
     navigate('/dashboard')
   }
+
+  console.log(currentUser)
 
   const {
     register,
@@ -54,8 +58,8 @@ export default function UsersProfile() {
     if (res) {
       Object.entries(res).forEach(([key, value]) => {
         setValue(key, value)
-        if (key === 'email') {
-          setEmailUser(value)
+        if (key === 'id') {
+          setIdUser(value)
         }
       })
     }
@@ -64,7 +68,7 @@ export default function UsersProfile() {
 
   const uploadPhoto = async e => {
     const file = e.target.files[0]
-    const new_file = new File([file], emailUser, { type: file.type })
+    const new_file = new File([file], `photo-${idUser}`, { type: file.type })
     setIsLoading(true)
     try {
       const res = await Storage.put(new_file.name, new_file, {
@@ -81,15 +85,23 @@ export default function UsersProfile() {
   }
 
   const checkImageExist = async () => {
-    if (!emailUser) return
-    const resp = await Storage.get(emailUser, {
-      level: 'public',
-      download: true,
-      contentType: ' "image/png"',
-    })
-    let image = new Image()
-    image.src = URL.createObjectURL(resp.Body)
-    setImageUrl(image.src)
+    if (!idUser) return
+    setIsLoading(true)
+    try {
+      const res = await Storage.get(`photo-${idUser}`, {
+        level: 'public',
+        download: true,
+        contentType: ' "image/png"',
+      })
+      if (res) {
+        let image = new Image()
+        image.src = URL.createObjectURL(res.Body)
+        setImageUrl(image.src)
+      }
+    } catch (error) {
+      console.log('Error uploading file: ', error)
+    }
+    setIsLoading(false)
   }
 
   //Initial Data
@@ -104,8 +116,7 @@ export default function UsersProfile() {
 
   useEffect(() => {
     checkImageExist()
-    //
-  }, [emailUser])
+  }, [idUser])
 
   const onChange = e => {
     let index = e.target.selectedIndex
@@ -116,28 +127,35 @@ export default function UsersProfile() {
 
   const option = countries.countries.country.map((column, index) => {
     return (
-      <option key={index} data={column.currencyCode} value={column.countryCode}>
-        {column.countryName}
+      <option key={index} data={column.currency.symbol} value={column.code}>
+        {column.name}
       </option>
     )
   })
 
   const optionCurrency = countries.countries.country.map((column, index) => {
     return (
-      <option key={index} value={column.currencyCode}>
-        {column.currencyCode}
+      <option key={index} value={column.currency.symbol}>
+        {column.currency.symbol}
       </option>
     )
   })
 
   return (
     <div>
-      <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-        <Button leftIcon={<UserPlus />} onClick={() => setOpenedDelegate(true)}>
-          Delegate
-        </Button>
-      </div>
-      <hr />
+      {currentUser && currentUser.type === 'admin' && (
+        <div>
+          <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+            <Button
+              leftIcon={<UserPlus />}
+              onClick={() => setOpenedDelegate(true)}
+            >
+              Delegate
+            </Button>
+          </div>
+          <hr />
+        </div>
+      )}
       <div className="card shadow mb-4">
         <div className="card-header py-3">
           <h6 className="m-0 font-weight-bold text-primary">My account</h6>
