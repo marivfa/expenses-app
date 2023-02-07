@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useCallback } from 'react'
 import { GetAll } from '../../commons/Api'
 import CardList from '../../components/CardList'
 import Card from '../../components/Card'
@@ -18,68 +18,33 @@ export default function MainExpenses() {
   const [remainders, setRemainders] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
-  const [currentUser, setCurrentUser] = useContext(UsersContext)
-  console.log('user_dashbo', currentUser)
+  const [currentUser] = useContext(UsersContext)
 
-  useEffect(() => {
-    getResume()
-    getLineData()
-    getColumnData()
-    getPieData()
+  const fetchData = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const [resume, line, column, pie] = await Promise.all([
+        GetAll(`dashboard/resumen`),
+        GetAll(`dashboard/by_month`),
+        GetAll(`dashboard/by_category`),
+        GetAll(`dashboard/by_type`)
+      ])
+
+      if (resume) setData(resume)
+      if (line.status) setLine(line.data)
+      if (column.status) setColumn(column.data)
+      if (pie.status) setPie(pie.data)
+
+    } catch (err) {
+      console.error(err)
+    }
+    setIsLoading(false)
   }, [])
 
-  const getResume = async () => {
-    setIsLoading(true)
-    const res = await GetAll(`dashboard/resumen`)
-    if (res) {
-      setData(res)
-      console.log('here')
-    }
-    setIsLoading(false)
-  }
 
-  const getLineData = async () => {
-    setIsLoading(true)
-    const res = await GetAll(`dashboard/by_month`)
-    if (res) {
-      setLine(res)
-    }
-    setIsLoading(false)
-  }
-
-  const getColumnData = async () => {
-    setIsLoading(true)
-    const res = await GetAll(`dashboard/by_category`)
-    if (res) {
-      let arrTMP = []
-      Object.entries(res).forEach(([key, value]) => {
-        let obj = {
-          category: key,
-          amount: value,
-        }
-        arrTMP.push(obj)
-      })
-      setColumn(arrTMP)
-    }
-    setIsLoading(false)
-  }
-
-  const getPieData = async () => {
-    setIsLoading(true)
-    const res = await GetAll(`dashboard/by_type`)
-    if (res) {
-      let arrTMP = []
-      Object.entries(res).forEach(([key, value]) => {
-        let obj = {
-          type: key,
-          value: value,
-        }
-        arrTMP.push(obj)
-      })
-      setPie(arrTMP)
-    }
-    setIsLoading(false)
-  }
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   //const getRemainders = () => {}
 
@@ -92,6 +57,7 @@ export default function MainExpenses() {
             value={data.expenses_monthly}
             leftColor={'border-left-warning'}
             textColor={'text-warning'}
+            currency={currentUser ? currentUser.currency : '$'}
           />
         </div>
 
@@ -101,6 +67,7 @@ export default function MainExpenses() {
             value={data.avg_monthly}
             leftColor={'border-left-primary'}
             textColor={'text-primary'}
+            currency={currentUser ? currentUser.currency : '$'}
           />
         </div>
 
@@ -110,6 +77,7 @@ export default function MainExpenses() {
             value={data.total_annual}
             leftColor={'border-left-success'}
             textColor={'text-success'}
+            currency={currentUser ? currentUser.currency : '$'}
           />
         </div>
       </div>

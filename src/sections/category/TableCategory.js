@@ -16,8 +16,7 @@ export default function TableCategory() {
 
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [currentUser, setCurrentUser] = useContext(UsersContext)
-  console.log(currentUser, 'tablecategory')
+  const [currentUser] = useContext(UsersContext)
 
   const navigate = useNavigate()
   const onEdit = id => {

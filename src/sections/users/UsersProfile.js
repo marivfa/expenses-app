@@ -19,19 +19,16 @@ export default function UsersProfile() {
   const [opened, setOpened] = useState(false)
   const [openedDelegate, setOpenedDelegate] = useState(false)
   const [idUser, setIdUser] = useState('')
-  const [imageExist, setImageExist] = useState(null)
-  const [error, setError] = useState(null)
+  const [setImageExist] = useState(null)
   const [imageUrl, setImageUrl] = useState(null)
-  const imgDefaultd = '../img/undraw_profile.svg'
-  const [currentUser, setCurrentUser] = useContext(UsersContext)
+  const imgDefault = '../img/undraw_profile.svg'
+  const [currentUser] = useContext(UsersContext)
 
   const navigate = useNavigate()
 
   const onCancel = () => {
     navigate('/dashboard')
   }
-
-  console.log(currentUser)
 
   const {
     register,
@@ -112,10 +109,12 @@ export default function UsersProfile() {
     }
     fetchData()
     //
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     checkImageExist()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idUser])
 
   const onChange = e => {
@@ -166,7 +165,7 @@ export default function UsersProfile() {
               <Avatar
                 radius="xl"
                 size="xl"
-                src={imageUrl ? imageUrl : imgDefaultd}
+                src={imageUrl ? imageUrl : imgDefault}
               />
             </div>
           </div>

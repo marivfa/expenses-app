@@ -6,6 +6,7 @@ import { toast } from 'react-toastify'
 import { InfiniteScroll } from 'react-simple-infinite-scroll'
 import { Delete, GetAll } from '../../commons/Api'
 import { UsersContext } from '../../context/UsersContext'
+import { Storage } from 'aws-amplify'
 
 import '../../style.css'
 
@@ -24,8 +25,7 @@ export default function TableExpenses() {
   const [isLoading, setIsLoading] = useState(true)
   const [cursor, setCursor] = useState(0)
   const [isDelete, setIsDelete] = useState(false)
-  const [currentUser, setCurrentUser] = useContext(UsersContext)
-  console.log(currentUser, 'tableexpenses')
+  const [currentUser] = useContext(UsersContext)
 
   const navigate = useNavigate()
   const onEdit = id => {
@@ -59,21 +59,46 @@ export default function TableExpenses() {
   const onExcel = async () => {
     const res = await GetAll(`expenses/xls`)
     if (res) {
-      const link = document.createElement('a')
-      link.target = '_blank'
-      link.href = res.url
-      link.click()
+      getFileExcel(res.url)
+      
     } else {
       toast.error(`${res.error} `)
     }
   }
 
+  const getFileExcel = async (url) => {
+    setIsLoading(true)
+    try {
+      const res = await Storage.get(`${url}`, {
+        level: 'public',
+        download: true,
+      })
+      if (res) {
+        const blob = new Blob([res.Body], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a')
+        link.target = '_blank'
+        link.href = url
+        link.download = 'data.csv';
+        link.click()
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.log('Error uploading file: ', error)
+    }
+    setIsLoading(false)
+  }
+
+
+
   useEffect(() => {
     loadMore()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDelete])
 
   useEffect(() => {
     loadMore()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const rows = items?.map((expenses, index) => {

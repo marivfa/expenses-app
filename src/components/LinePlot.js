@@ -4,7 +4,7 @@ export default function LinePlot({ data }) {
   const config = {
     data,
     padding: 'auto',
-    xField: 'Date',
+    xField: 'date',
     yField: 'amount',
     xAxis: {
       tickCount: 5,
