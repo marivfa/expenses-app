@@ -11,21 +11,21 @@ import { Storage } from 'aws-amplify'
 import '../../style.css'
 
 export default function TableExpenses() {
-  const cols = [
-    { header: 'Date Register', field: 'date_register', type: 'text' },
-    { header: 'Category', field: 'category', type: 'text' },
-    { header: 'Amount', field: 'amount', type: 'text' },
-    { header: 'Real Date', field: 'real_date', type: 'text' },
-    { header: 'Comment', field: 'comment', type: 'text' },
-    { header: 'User', field: 'user', type: 'date' },
-    { header: '', field: '', type: '' },
-  ]
-
   const [items, setItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [cursor, setCursor] = useState(0)
   const [isDelete, setIsDelete] = useState(false)
   const [currentUser] = useContext(UsersContext)
+
+  const cols = [
+    { header: 'Date Register', field: 'date_register', type: 'text' },
+    { header: 'Category', field: 'category', type: 'text' },
+    { header: `Amount (${currentUser && currentUser.currency})`, field: 'amount', type: 'text' },
+    { header: 'Real Date', field: 'real_date', type: 'text' },
+    { header: 'Comment', field: 'comment', type: 'text' },
+    { header: 'User', field: 'user', type: 'date' },
+    { header: '', field: '', type: '' },
+  ]
 
   const navigate = useNavigate()
   const onEdit = id => {
@@ -33,15 +33,14 @@ export default function TableExpenses() {
   }
 
   //BtnDelete
-  const onDel = id => {
-    Delete(`expenses/${id}`).then(res => {
-      if (res) {
-        toast.success('Expenses Deleted')
-        setItems([])
-        setCursor(0)
-        setIsDelete(true)
-      }
-    })
+  const onDel = async id => {
+    const res = await Delete(`expenses/${id}`)
+    if (res) {
+      toast.success('Expenses Deleted')
+      setItems([])
+      setCursor(0)
+      setIsDelete(true)
+    }
   }
 
   const loadMore = async () => {

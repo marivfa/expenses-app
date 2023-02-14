@@ -8,14 +8,14 @@ import PiePlot from '../../components/PiePlot'
 
 import { UsersContext } from '../../context/UsersContext'
 
-import { LoadingOverlay } from '@mantine/core'
+import { LoadingOverlay, Button, ScrollArea } from '@mantine/core'
 import '../../style.css'
 export default function MainExpenses() {
   const [data, setData] = useState([])
   const [line, setLine] = useState([])
   const [column, setColumn] = useState([])
   const [pie, setPie] = useState([])
-  const [remainders, setRemainders] = useState([])
+  const [reminders, setReminders] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
   const [currentUser] = useContext(UsersContext)
@@ -46,14 +46,27 @@ export default function MainExpenses() {
     fetchData()
   }, [fetchData])
 
-  //const getRemainders = () => {}
+
+  const getReminders = async (option) => {
+    setIsLoading(true)
+    const res = await GetAll(`dashboard/reminder/?option=${option}`)
+    if (res) {
+      setReminders(res.data)
+    }
+    setIsLoading(false)
+  }
+
+  useEffect(() => {
+    getReminders('daily')
+  }, [])
+
 
   return (
     <div>
       <div className="row">
         <div className="col-xl-4 col-md-6 mb-4">
           <Card
-            title={'Expenses Monthly'}
+            title={'Total expenses current month'}
             value={data.expenses_monthly}
             leftColor={'border-left-warning'}
             textColor={'text-warning'}
@@ -73,7 +86,7 @@ export default function MainExpenses() {
 
         <div className="col-xl-4 col-md-6 mb-4">
           <Card
-            title={'Expenses (Annual)'}
+            title={'Total expenses (Annual)'}
             value={data.total_annual}
             leftColor={'border-left-success'}
             textColor={'text-success'}
@@ -97,7 +110,7 @@ export default function MainExpenses() {
                   overlayBlur={2}
                   transitionDuration={500}
                 />
-                <LinePlot data={line} />
+                <LinePlot data={line} currency={currentUser ? currentUser.currency : '$'}/>
               </div>
             </div>
           </div>
@@ -106,26 +119,18 @@ export default function MainExpenses() {
         <div className="col-xl-4 col-lg-7">
           <div className="card shadow mb-4">
             <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-              <h6 className="m-0 font-weight-bold text-primary">Remainders</h6>
+              <h6 className="m-0 font-weight-bold text-primary">Reminders</h6>
             </div>
             <div className="card-body">
-              <div
-                className="btn-group btn-group-sm"
-                role="group"
-                aria-label="Busqueda"
-              >
-                <button type="button" className="btn btn-light">
-                  Day
-                </button>
-                <button type="button" className="btn btn-light">
-                  Week
-                </button>
-                <button type="button" className="btn btn-light">
-                  Month
-                </button>
-              </div>
+              <Button.Group>
+                <Button variant="default" onClick={() => getReminders('daily')}>Day</Button>
+                <Button variant="default" onClick={() => getReminders('weekly')}>Week</Button>
+                <Button variant="default" onClick={() => getReminders('monthly')}>Month</Button>
+              </Button.Group>
               <hr></hr>
-              <CardList data={remainders} />
+              <ScrollArea style={{ height: 250 }}>
+                <CardList data={reminders} />
+              </ScrollArea>
             </div>
           </div>
         </div>
@@ -146,7 +151,7 @@ export default function MainExpenses() {
                   overlayBlur={2}
                   transitionDuration={500}
                 />
-                <ColumnPlot data={column} />
+                <ColumnPlot data={column} currency={currentUser ? currentUser.currency : '$'}/>
               </div>
             </div>
           </div>
@@ -166,7 +171,7 @@ export default function MainExpenses() {
                   overlayBlur={2}
                   transitionDuration={500}
                 />
-                <PiePlot data={pie} />
+                <PiePlot data={pie} currency={currentUser ? currentUser.currency : '$'}/>
               </div>
             </div>
           </div>

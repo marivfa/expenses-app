@@ -4,12 +4,12 @@ import { Button} from '@mantine/core';
 import { SquarePlus} from 'tabler-icons-react';
 import '../../style.css'
 
-import TableRemainders from './TableRemainders'
+import TableReminders from './TableReminders'
 
-export default function MainRemainders() {
+export default function MainReminders() {
   const navigate = useNavigate()
   const onAdd = () => {
-    navigate('/remainders/create')
+    navigate('/reminders/create')
   }
 
   return (
@@ -20,7 +20,7 @@ export default function MainRemainders() {
         </Button>
       </div>
       <hr />
-      <TableRemainders />
+      <TableReminders />
     </div>
   )
 }

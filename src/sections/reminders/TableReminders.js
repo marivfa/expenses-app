@@ -1,25 +1,24 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Table, Button} from '@mantine/core';
+import { Table, Button ,LoadingOverlay, Flex} from '@mantine/core';
 import { Edit, Trash } from 'tabler-icons-react';
 import { Delete, GetAll } from '../../commons/Api'
 import { toast } from 'react-toastify'
-
+import { InfiniteScroll } from 'react-simple-infinite-scroll'
+import { UsersContext } from '../../context/UsersContext'
 import '../../style.css'
 
-import { InfiniteScroll } from 'react-simple-infinite-scroll'
 
-export default function TableRemainders() {
+export default function TableReminders() {
   const cols = [
     { header: 'Date Register', field: 'date_register', type: 'date' },
     { header: 'Description', field: 'description', type: 'text' },
     { header: 'Frecuency', field: 'frecuency', type: 'text' },
-    { header: 'Remainder Date', field: 'remainder_date', type: 'text' },
-    { header: 'Until Date', field: 'until_date', type: 'date' },
+    { header: 'Reminder Date', field: 'remainder_date', type: 'text' },
     { header: '', field: '', type: '' },
   ]
 
-
+  const [currentUser] = useContext(UsersContext)
   const [items, setItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [cursor, setCursor] = useState(0)
@@ -28,19 +27,18 @@ export default function TableRemainders() {
 
   const navigate = useNavigate()
   const onEdit = id => {
-    navigate(`/remainders/edit/${id}`)
+    navigate(`/reminders/edit/${id}`)
   }
 
   //BtnDelete
-  const onDel = id => {
-    Delete(`remainders/${id}`).then(res => {
-      if (res) {
-        toast.success('Remainders Deleted')
-        setItems([])
-        setCursor(0)
-        setIsDelete(true)
-      }
-    })
+  const onDel = async id => {
+    const res = await Delete(`remainders/${id}`)
+    if (res) {
+      toast.success('Reminders Deleted')
+      setItems([])
+      setCursor(0)
+      setIsDelete(true)
+    }
   }
 
   useEffect(() => {
@@ -69,17 +67,42 @@ export default function TableRemainders() {
     )
   }
 
-  const rows = items?.map((remainders, index) => {
+  const rows = items?.map((detail, index) => {
     return (
       <tr key={index}>
-        <td>{remainders.date_register}</td>
-        <td>{remainders.description}</td>
-        <td>{remainders.frecuency}</td>
-        <td>{remainders.until_date}</td>
+        <td>{detail.date_register}</td>
+        <td>{detail.description}</td>
+        <td>{detail.frecuency}</td>
+        <td>{detail.until_date}</td>
         <td>
-          <Button leftIcon={<Edit/>} onClick={() => onEdit(remainders.id)} color="blue" variant='subtle' compact></Button>
-          &nbsp;
-          <Button leftIcon={<Trash/>} onClick={() => onDel(remainders.id)} color="red" variant='subtle' compact></Button>
+          {currentUser &&
+            ((currentUser.type === 'delegate' &&
+              currentUser.id === detail.id_user) ||
+              currentUser.type === 'admin') && (
+              <Flex
+                mih={50}
+                gap="xs"
+                justify="center"
+                align="center"
+                direction="row"
+                wrap="wrap"
+              >
+                <Button
+                  leftIcon={<Edit />}
+                  onClick={() => onEdit(detail.id)}
+                  color="blue"
+                  variant="subtle"
+                  compact
+                ></Button>
+                <Button
+                  leftIcon={<Trash />}
+                  onClick={() => onDel(detail.id)}
+                  color="red"
+                  variant="subtle"
+                  compact
+                ></Button>
+              </Flex>
+            )}
         </td>
       </tr>
     )
@@ -92,10 +115,15 @@ export default function TableRemainders() {
   return (
     <div className="card shadow mb-4">
       <div className="card-header py-3">
-        <h6 className="m-0 font-weight-bold text-primary">Remainders</h6>
+        <h6 className="m-0 font-weight-bold text-primary">Reminders</h6>
       </div>
       <div className="card-body">
         <div className="table-responsive">
+          <LoadingOverlay
+            visible={isLoading}
+            overlayBlur={2}
+            transitionDuration={500}
+          />
           <InfiniteScroll
             throttle={64}
             threshold={200}

@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-
 import { Select, Button, Flex } from '@mantine/core'
-
-import '../../style.css'
-
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { GetAll, Save } from '../../commons/Api'
+import '../../style.css'
 
 export default function FormExpenses() {
   const { id } = useParams()
@@ -143,13 +140,15 @@ export default function FormExpenses() {
           </div>
           <div className="row form-group">
             <div className="col-sm-6">
-              <input
-                type="text"
+              
+            <input
+                type="number"
                 className="form-control"
                 name="amount"
                 placeholder="Amount"
-                {...register('amount', { required: true })}
+                {...register('amount', { required: true ,valueAsNumber: true})}
               />
+
               <span className="form-error">
                 {errors.amount && 'Amount is required'}
               </span>
@@ -159,6 +158,7 @@ export default function FormExpenses() {
 
           <div className="row form-group">
             <div className="col-sm-6">
+
               Real Date
               <input
                 type="date"
@@ -188,7 +188,7 @@ export default function FormExpenses() {
 
           <div className="row form-group">
             <div className="col-sm-6">
-              <span>Mark as remainder</span>
+              <span>Mark as reminder</span>
               <input
                 className="form-control"
                 name="is_remainder"

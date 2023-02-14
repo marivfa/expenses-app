@@ -5,8 +5,8 @@ import MainExpenses from './sections/expenses/MainExpenses'
 import FormExpenses from './sections/expenses/FormExpenses'
 import MainCategory from './sections/category/MainCategory'
 import FormCategory from './sections/category/FormCategory'
-import MainRemainders from './sections/remainders/MainRemainders'
-import FormRemainders from './sections/remainders/FormRemainders'
+import MainReminders from './sections/reminders/MainReminders'
+import FormReminders from './sections/reminders/FormReminders'
 import MainDashboard from './sections/dashboard/MainDashboard'
 import FormLogin from './sections/login/FormLogin'
 import UsersProfile from './sections/users/UsersProfile'
@@ -24,9 +24,9 @@ export default function MainRouter() {
       <Route path="/expenses" exact element={<MainExpenses />} />
       <Route path="/expenses/create" exact element={<FormExpenses />} />
       <Route path="/expenses/edit/:id" exact element={<FormExpenses />} />
-      <Route path="/remainders" exact element={<MainRemainders />} />
-      <Route path="/remainders/create" exact element={<FormRemainders />} />
-      <Route path="/remainders/edit/:id" exact element={<FormRemainders />} />
+      <Route path="/reminders" exact element={<MainReminders />} />
+      <Route path="/reminders/create" exact element={<FormReminders />} />
+      <Route path="/reminders/edit/:id" exact element={<FormReminders />} />
     </Routes>
   )
 }

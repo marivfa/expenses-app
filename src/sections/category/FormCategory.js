@@ -1,28 +1,19 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import '../../style.css'
-
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import { Button, Flex } from '@mantine/core'
+import { Button, Flex , Modal} from '@mantine/core'
 import { GetAll, Save } from '../../commons/Api'
+import '../../style.css'
 
-export default function FormCategory() {
-  const { id } = useParams()
-  const isAdd = !id
+export default function FormCategory({ opened, setOpened, getDataCat , id}) {
   const [isLoading, setIsLoading] = useState(false)
   const {
     register,
     formState: { errors },
     handleSubmit,
     setValue,
+    reset,
   } = useForm()
-
-  const navigate = useNavigate()
-
-  const onCancel = () => {
-    navigate('/category')
-  }
 
   //Save Category
   const onSubmit = async data => {
@@ -33,7 +24,9 @@ export default function FormCategory() {
     const res = await Save(URL, method, data)
     if (res) {
       toast.success('Submitted successfully')
-      onCancel()
+      reset()
+      await getDataCat()
+      setOpened(false)
     } else {
       toast.error(`Form submit error ${res.error} `)
     }
@@ -42,6 +35,7 @@ export default function FormCategory() {
 
   const getCategory = async () => {
     setIsLoading(true)
+    
     const res = await GetAll(`category/${id}`)
     if (res) {
       Object.entries(res).forEach(([key, value]) => {
@@ -50,26 +44,31 @@ export default function FormCategory() {
     }
     setIsLoading(false)
   }
+  
+  const onCancel = () => {
+      reset()
+      setOpened(false)
+  }
 
   //Get One Category -- Edit
   useEffect(() => {
-    if (!isAdd) {
+    if (id > 0) {
       getCategory()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [id])
 
   return (
-    <div className="card shadow mb-4">
-      <div className="card-header py-3">
-        <h6 className="m-0 font-weight-bold text-primary">
-          {isAdd ? 'Add' : 'Edit'} Category
-        </h6>
-      </div>
-      <div className="card-body">
+    <Modal
+        centered
+        opened={opened}
+        onClose={() => setOpened(false)}
+        withCloseButton={true}
+        title={id === 0 ? 'Add Category' : 'Edit Category'}
+      >
         <form className="user" onSubmit={handleSubmit(onSubmit)}>
           <div className="row form-group">
-            <div className="col-sm-6">
+            <div className="col-sm-12">
               <input
                 type="text"
                 className="form-control"
@@ -81,7 +80,10 @@ export default function FormCategory() {
                 {errors.description && 'description is required'}
               </span>
             </div>
-            <div className="col-sm-6">
+           </div> 
+           <div className="row form-group">
+            <div className="col-sm-12">
+              <label>Type</label>
               <select
                 className="form-control"
                 name="type"
@@ -113,7 +115,6 @@ export default function FormCategory() {
             </Button>
           </Flex>
         </form>
-      </div>
-    </div>
+    </Modal>
   )
 }

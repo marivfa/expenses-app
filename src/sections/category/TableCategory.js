@@ -1,52 +1,18 @@
 import { useEffect, useState, useContext } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Table, Button, LoadingOverlay, Flex } from '@mantine/core'
 import { Edit, Trash } from 'tabler-icons-react'
-import { Delete, GetAll } from '../../commons/Api'
-import { toast } from 'react-toastify'
+
 import { UsersContext } from '../../context/UsersContext'
 import '../../style.css'
 
-export default function TableCategory() {
+export default function TableCategory({data, isLoading, onEdit, onDel}) {
   const cols = [
     { header: 'Description', field: 'description', type: 'text' },
     { header: 'Type', field: 'type', type: 'text' },
     { header: '', field: '', type: '' },
   ]
-
-  const [data, setData] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  
   const [currentUser] = useContext(UsersContext)
-
-  const navigate = useNavigate()
-  const onEdit = id => {
-    navigate(`/category/edit/${id}`)
-  }
-
-  //BtnDelete
-  const onDel = async id => {
-    setIsLoading(true)
-    const res = await Delete(`category/${id}`)
-    if (res) {
-      toast.success('Category Deleted')
-      getDataCat()
-    }
-    setIsLoading(false)
-  }
-
-  const getDataCat = async () => {
-    setIsLoading(true)
-    const res = await GetAll(`category`)
-    if (res) {
-      setData(res)
-    }
-    setIsLoading(false)
-  }
-
-  //Initial Data
-  useEffect(() => {
-    getDataCat()
-  }, [])
 
   const rows = data?.map((category, index) => {
     return (
@@ -92,6 +58,7 @@ export default function TableCategory() {
   })
 
   return (
+    <>
     <div className="card shadow mb-4">
       <div className="card-header py-3">
         <h6 className="m-0 font-weight-bold text-primary">Category</h6>
@@ -115,5 +82,6 @@ export default function TableCategory() {
         </div>
       </div>
     </div>
+    </>
   )
 }

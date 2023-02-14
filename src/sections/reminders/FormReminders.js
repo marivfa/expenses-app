@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import { Button, Flex } from '@mantine/core'
 import { GetAll, Save } from '../../commons/Api'
 
-export default function FormRemainders() {
+export default function FormReminders() {
   const { id } = useParams()
   const isAdd = !id
   const {
@@ -21,7 +21,6 @@ export default function FormRemainders() {
   const frecuency = register('frecuency')
   const myValue = watch('frecuency', 'default')
 
-  const [category, setCategory] = useState([])
   const [slcFrecuencyValue, setSlcFrecuencyValue] = useState()
   const [showSelectDay, setShowSelectDay] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -29,7 +28,7 @@ export default function FormRemainders() {
   const navigate = useNavigate()
 
   const onCancel = () => {
-    navigate('/remainders')
+    navigate('/reminders')
   }
 
   const handleChange = e => {
@@ -41,14 +40,16 @@ export default function FormRemainders() {
 
   useEffect(() => {
     handleChange()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myValue])
 
-  //Save Remainders
+  //Save Reminders
   const onSubmit = data => {
     const method = id ? 'PUT' : 'POST'
-    //delete data.id
-    //delete data.status
-    data.id_user = 0
+     data.id_user = 0
+    if(data.frecuency === 'none'){
+      data.until_date = data.remainder_date
+    }
 
     const URL = id ? `remainders/${id}` : 'remainders'
     Save(URL, method, data).then(res => {
@@ -61,7 +62,7 @@ export default function FormRemainders() {
     })
   }
 
-  //Get One Remainders -- Edit
+  //Get One Reminders -- Edit
   useEffect(() => {
     if (!isAdd) {
       GetAll(`remainders/${id}`).then(res => {
@@ -79,7 +80,7 @@ export default function FormRemainders() {
     <div className="card shadow mb-4">
       <div className="card-header py-3">
         <h6 className="m-0 font-weight-bold text-primary">
-          {isAdd ? 'Add' : 'Edit'} Remainders
+          {isAdd ? 'Add' : 'Edit'} Reminders
         </h6>
       </div>
       <div className="card-body">
@@ -110,11 +111,11 @@ export default function FormRemainders() {
                 {...register('frecuency', { required: true })}
               >
                 <option>Select Frecuency</option>
+                <option value="none">None</option>
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
                 <option value="annual">Annual</option>
-                <option value="none">None</option>
               </select>
               <span className="form-error">
                 {errors.frecuency && 'Frecuency is required'}
@@ -148,6 +149,22 @@ export default function FormRemainders() {
               </div>
             </div>
           )}
+
+          <div className="row form-group">
+            <div className="col-sm-6">
+              Reminder Date
+              <input
+                type="date"
+                className="form-control"
+                name="remainder_date"
+                placeholder="Reminder Date"
+                {...register('remainder_date', { required: true })}
+              />
+              <span className="form-error">
+                {errors.remainder_date && 'Reminder Date is required'}
+              </span>
+            </div>
+          </div>
 
           <div className="row form-group">
             <div className="col-sm-6">
@@ -185,19 +202,3 @@ export default function FormRemainders() {
     </div>
   )
 }
-
-/*<div className="row form-group">
-            <div className="col-sm-6">
-              Remainder Date
-              <input
-                type="date"
-                className="form-control"
-                name="remainder_date"
-                placeholder="Remainder Date"
-                {...register('remainder_date', { required: true })}
-              />
-              <span className="form-error">
-                {errors.remainder_date && 'Remainder Date is required'}
-              </span>
-            </div>
-          </div>*/

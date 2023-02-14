@@ -5,7 +5,7 @@ import '../style.css'
 
 import MainExpenses from '../sections/expenses/MainExpenses'
 import MainCategory from '../sections/category/MainCategory'
-//import MainRemainders from '../sections/remainders/MainRemainders'
+import MainReminders from '../sections/reminders/MainReminders'
 import MainDashboard from '../sections/dashboard/MainDashboard'
 
 const items = [
@@ -27,12 +27,12 @@ const items = [
     comp: MainExpenses,
     icon: ReportMoney,
   },
-  /*{
-    path: '/remainders',
-    text: 'Remainders',
-    comp: MainRemainders,
+  {
+    path: '/reminders',
+    text: 'Reminders',
+    comp: MainReminders,
     icon: Alarm
-  },*/
+  },
 ]
 
 export default function NavBar() {

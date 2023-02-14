@@ -1,22 +1,24 @@
-import Badge from 'react-bootstrap/Badge'
 import ListGroup from 'react-bootstrap/ListGroup'
+import { Card, Text, Badge, Group, Space } from '@mantine/core';
 
 export default function CardList({ data }) {
+  
   const listItem = data?.map((data, index) => {
     return (
-      <ListGroup.Item
-        key={index}
-        as="li"
-        className="d-flex justify-content-between align-items-start"
-      >
-        <div className="ms-2 me-auto">
-          <div className="fw-bold">Description</div>
-          Date
-        </div>
-        <Badge bg="primary" pill>
-          State
-        </Badge>
-      </ListGroup.Item>
+      <div key={data.detail_id}>
+      <Card p="xs" radius="md" withBorder >
+        <Group position="apart">
+          <Text weight={500}>{data.description}</Text>
+          <Badge color={`${data.status === 'pending' ? 'pink' : 'green'}`} variant="light">
+            {data.status}
+          </Badge>
+        </Group>
+        <Text size="xs" color="dimmed" ta="left">
+          {data.date_time}
+        </Text>
+      </Card>
+      <Space h="xs" />
+      </div>
     )
   })
 
@@ -25,7 +27,7 @@ export default function CardList({ data }) {
       {data.length > 0 ? (
         <ListGroup as="ol">{listItem}</ListGroup>
       ) : (
-        <h5>No remainders to show</h5>
+        <h5>No reminders to show</h5>
       )}
     </div>
   )
