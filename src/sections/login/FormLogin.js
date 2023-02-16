@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Button } from '@mantine/core'
+import { Button, Image , Center, Paper} from '@mantine/core'
 import FormForgotPassword from './FormForgotPassword'
 import FormCreate from './FormCreate'
 import '../../style.css'
@@ -79,103 +79,107 @@ export default function FormLogin({ setToken }) {
 
   return (
     <div>
-      <div>
-        <h3 className="app-title">Expenses</h3>
-      </div>
-      {login && (
-        <div className="card shadow mb-4">
-          <div className="card-header py-3">
-            <h6 className="m-0 font-weight-bold text-primary">Login</h6>
-          </div>
-          <div className="card-body">
-            <h6
-              className={`m-0 font-weight-bold ${error && 'text-danger'} ${
-                msj && 'text-success'
-              }`}
-            >
-              {error}
-              {msj}
-            </h6>
-            <hr />
-            <form className="user" onSubmit={handleSubmit(onSubmit)}>
-              <div className="form-group">
-                <input
-                  type="email"
-                  className="form-control"
-                  name="Username"
-                  placeholder="Username"
-                  {...register('username', {
-                    required: true,
-                    pattern: {
-                      value: /\S+@\S+\.\S+/,
-                      message: 'Entered value does not match email format',
-                    },
-                  })}
-                />
-                <span className="form-error">
-                  {errors.username && 'Username is required'}
-                </span>
-              </div>
-              <div className="form-group">
-                <input
-                  type="password"
-                  className="form-control"
-                  name="Password"
-                  placeholder="Password"
-                  {...register('password', {
-                    required: true,
-                    minLength: {
-                      value: 8,
-                      message: 'min length is 8',
-                    },
-                  })}
-                />
-                <span className="form-error">
-                  {errors.password && 'Password is required'}
-                </span>
-              </div>
-              <hr />
-              <div className="offset-sm-5 col-sm-4">
-                <Button type="submit" loading={isLoading}>
-                  Login
-                </Button>
-              </div>
-              <div className="text-center">
-                <a
-                  className="small"
-                  href="/"
-                  role="button"
-                  onClick={onClickForgotPass}
-                >
-                  Forgot Password?
-                </a>
-              </div>
-              <div className="text-center">
-                <a
-                  className="small"
-                  href="/"
-                  role="button"
-                  onClick={onClickCreate}
-                >
-                  Create an Account!
-                </a>
-              </div>
-            </form>
-          </div>
+      <Center style={{ height: '100vh' }}>
+        <Paper style={{ maxWidth: 400, width: '100%'}}>
+        <div style={{ display: 'flex', justifyContent: 'center', padding:10}}>
+          <Image src="../img/logo.png" alt="Finn by me" width={170} height={120} />
         </div>
-      )}
-      {forgotPass && (
-        <FormForgotPassword
-          onClickCreate={onClickCreate}
-          onClickLogin={onClickLogin}
-        />
-      )}
-      {create && (
-        <FormCreate
-          onClickForgotPass={onClickForgotPass}
-          onClickLogin={onClickLogin}
-        />
-      )}
+          {login && (
+            <div className="card shadow mb-4">
+              <div className="card-header py-3">
+                <h6 className="m-0 font-weight-bold text-primary">Login</h6>
+              </div>
+              <div className="card-body">
+                <h6
+                  className={`m-0 font-weight-bold ${error && 'text-danger'} ${
+                    msj && 'text-success'
+                  }`}
+                >
+                  {error}
+                  {msj}
+                </h6>
+                <hr/>
+                <form className="user" onSubmit={handleSubmit(onSubmit)}>
+                  <div className="form-group">
+                    <input
+                      type="email"
+                      className="form-control"
+                      name="Username"
+                      placeholder="Username"
+                      {...register('username', {
+                        required: true,
+                        pattern: {
+                          value: /\S+@\S+\.\S+/,
+                          message: 'Entered value does not match email format',
+                        },
+                      })}
+                    />
+                    <span className="form-error">
+                      {errors.username && 'Username is required'}
+                    </span>
+                  </div>
+                  <div className="form-group">
+                    <input
+                      type="password"
+                      className="form-control"
+                      name="Password"
+                      placeholder="Password"
+                      {...register('password', {
+                        required: true,
+                        minLength: {
+                          value: 8,
+                          message: 'min length is 8',
+                        },
+                      })}
+                    />
+                    <span className="form-error">
+                      {errors.password && 'Password is required'}
+                    </span>
+                  </div>
+                  <hr/>
+                  <Center>
+                    <Button type="submit" loading={isLoading}>
+                      Login
+                    </Button>
+                  </Center>
+                  <Center>
+                    <a
+                      className="small"
+                      href="/"
+                      role="button"
+                      onClick={onClickForgotPass}
+                    >
+                      Forgot Password?
+                    </a>
+                  </Center>
+                  <Center>
+                    <a
+                      className="small"
+                      href="/"
+                      role="button"
+                      onClick={onClickCreate}
+                    >
+                      Create an Account!
+                    </a>
+                  </Center>
+                </form>
+              </div>
+            </div>
+          )}
+          {forgotPass && (
+            <FormForgotPassword
+              onClickCreate={onClickCreate}
+              onClickLogin={onClickLogin}
+            />
+          )}
+          {create && (
+            <FormCreate
+              onClickForgotPass={onClickForgotPass}
+              onClickLogin={onClickLogin}
+            />
+          )}
+        </Paper>
+      </Center>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { Avatar } from '@mantine/core'
 import { Graph, Category, ReportMoney, Alarm } from 'tabler-icons-react'
 import '../style.css'
 
@@ -52,8 +53,13 @@ export default function NavBar() {
         className="sidebar-brand d-flex align-items-center justify-content-center"
         href="/dashboard"
       >
-        <div className="sidebar-brand-icon"></div>
-        <div className="sidebar-brand-text mx-3">Expenses</div>
+        <div className="sidebar-brand-icon">
+          <Avatar
+          radius="md" size="lg"
+          src="../img/logo.png"
+          alt="Finn By Me"
+        />
+        </div>
       </a>
       <hr className="sidebar-divider my-0"></hr>
       {li}

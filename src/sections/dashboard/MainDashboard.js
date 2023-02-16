@@ -129,6 +129,11 @@ export default function MainExpenses() {
               </Button.Group>
               <hr></hr>
               <ScrollArea style={{ height: 250 }}>
+                <LoadingOverlay
+                  visible={isLoading}
+                  overlayBlur={2}
+                  transitionDuration={500}
+                />
                 <CardList data={reminders} />
               </ScrollArea>
             </div>

@@ -51,67 +51,63 @@ export default function ModalDelegate({
         withCloseButton={true}
         title="Add Delegate"
       >
-        <div className="card shadow mb-4">
-          <div className="card-body">
-            <form className="user" onSubmit={handleSubmit(onSubmit)}>
-              <div className="form-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  name="Name"
-                  placeholder="Name"
-                  {...register('name', { required: true })}
-                />
-                <span className="form-error">
-                  {errors.name && 'Name is required'}
-                </span>
-              </div>
-
-              <div className="form-group">
-                <input
-                  type="email"
-                  className="form-control"
-                  name="Email"
-                  placeholder="Email"
-                  {...register('email', {
-                    required: true,
-                    pattern: {
-                      value: /\S+@\S+\.\S+/,
-                      message: 'Entered value does not match email format',
-                    },
-                  })}
-                />
-                <span className="form-error">
-                  {errors.email && 'Email is required'}
-                </span>
-              </div>
-              <div className="form-group">
-                <input
-                  type="password"
-                  className="form-control"
-                  name="Password"
-                  placeholder="Password"
-                  {...register('password', {
-                    required: true,
-                    minLength: {
-                      value: 8,
-                      message: 'min length is 8',
-                    },
-                  })}
-                />
-                <span className="form-error">
-                  {errors.password && 'Password is required'}
-                </span>
-              </div>
-              <hr />
-              <div className="offset-sm-4 col-sm-4">
-                <Button type="submit" loading={isLoading}>
-                  Register
-                </Button>
-              </div>
-            </form>
+        <form className="user" onSubmit={handleSubmit(onSubmit)}>
+          <div className="form-group">
+            <input
+              type="text"
+              className="form-control"
+              name="Name"
+              placeholder="Name"
+              {...register('name', { required: true })}
+            />
+            <span className="form-error">
+              {errors.name && 'Name is required'}
+            </span>
           </div>
-        </div>
+
+          <div className="form-group">
+            <input
+              type="email"
+              className="form-control"
+              name="Email"
+              placeholder="Email"
+              {...register('email', {
+                required: true,
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: 'Entered value does not match email format',
+                },
+              })}
+            />
+            <span className="form-error">
+              {errors.email && 'Email is required'}
+            </span>
+          </div>
+          <div className="form-group">
+            <input
+              type="password"
+              className="form-control"
+              name="Password"
+              placeholder="Password"
+              {...register('password', {
+                required: true,
+                minLength: {
+                  value: 8,
+                  message: 'min length is 8',
+                },
+              })}
+            />
+            <span className="form-error">
+              {errors.password && 'Password is required'}
+            </span>
+          </div>
+          <hr />
+          <div className="offset-sm-4 col-sm-4">
+            <Button type="submit" loading={isLoading}>
+              Register
+            </Button>
+          </div>
+        </form>
       </Modal>
     </div>
   )

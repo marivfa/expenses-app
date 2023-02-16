@@ -1,20 +1,13 @@
-import { useEffect, useState, useContext } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useContext } from 'react'
 import { Table, Button, LoadingOverlay, Flex } from '@mantine/core'
 import { FileSpreadsheet, Edit, Trash } from 'tabler-icons-react'
-import { toast } from 'react-toastify'
 import { InfiniteScroll } from 'react-simple-infinite-scroll'
-import { Delete, GetAll } from '../../commons/Api'
 import { UsersContext } from '../../context/UsersContext'
-import { Storage } from 'aws-amplify'
 
 import '../../style.css'
 
-export default function TableExpenses() {
-  const [items, setItems] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [cursor, setCursor] = useState(0)
-  const [isDelete, setIsDelete] = useState(false)
+export default function TableExpenses({items, isLoading, cursor, loadMore, onDel, onExcel, onEdit}) {
+  
   const [currentUser] = useContext(UsersContext)
 
   const cols = [
@@ -26,80 +19,7 @@ export default function TableExpenses() {
     { header: 'User', field: 'user', type: 'date' },
     { header: '', field: '', type: '' },
   ]
-
-  const navigate = useNavigate()
-  const onEdit = id => {
-    navigate(`/expenses/edit/${id}`)
-  }
-
-  //BtnDelete
-  const onDel = async id => {
-    const res = await Delete(`expenses/${id}`)
-    if (res) {
-      toast.success('Expenses Deleted')
-      setItems([])
-      setCursor(0)
-      setIsDelete(true)
-    }
-  }
-
-  const loadMore = async () => {
-    setIsDelete(false)
-    setIsLoading(true)
-
-    const res = await GetAll(`expenses?limit=20&offset=${cursor}`)
-    if (res) {
-      setItems([...items, ...res.items])
-      setCursor(res.offset + 10)
-    }
-    setIsLoading(false)
-  }
-
-  const onExcel = async () => {
-    const res = await GetAll(`expenses/xls`)
-    if (res) {
-      getFileExcel(res.url)
-      
-    } else {
-      toast.error(`${res.error} `)
-    }
-  }
-
-  const getFileExcel = async (url) => {
-    setIsLoading(true)
-    try {
-      const res = await Storage.get(`${url}`, {
-        level: 'public',
-        download: true,
-      })
-      if (res) {
-        const blob = new Blob([res.Body], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a')
-        link.target = '_blank'
-        link.href = url
-        link.download = 'data.csv';
-        link.click()
-        URL.revokeObjectURL(url);
-      }
-    } catch (error) {
-      console.log('Error uploading file: ', error)
-    }
-    setIsLoading(false)
-  }
-
-
-
-  useEffect(() => {
-    loadMore()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDelete])
-
-  useEffect(() => {
-    loadMore()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
+  
   const rows = items?.map((expenses, index) => {
     return (
       <tr key={index}>

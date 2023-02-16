@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import { Button, Avatar, Flex } from '@mantine/core'
+import { Button, Avatar, Flex , Grid, Col, Center} from '@mantine/core'
 import { UserPlus } from 'tabler-icons-react'
 import { Storage } from 'aws-amplify'
 
@@ -160,117 +160,120 @@ export default function UsersProfile() {
           <h6 className="m-0 font-weight-bold text-primary">My account</h6>
         </div>
         <div className="card-body">
-          <div className="row form-group">
-            <div className="col-sm-1">
-              <Avatar
-                radius="xl"
-                size="xl"
-                src={imageUrl ? imageUrl : imgDefault}
-              />
-            </div>
-          </div>
-          <div className="row form-group">
-            <div className="col-sm-4">
-              <input
-                type="file"
-                className="form-control"
-                name="photo"
-                placeholder="Upload Photo"
-                onChange={uploadPhoto}
-              />
-            </div>
-          </div>
-          <form className="user" onSubmit={handleSubmit(onSubmit)}>
+        <Grid>
+          <Col span={4}></Col>
+          <Col span="content">
+            <Center>
+            <Avatar
+              radius="xl"
+              size="xl"
+              src={imageUrl ? imageUrl : imgDefault}
+            />
+            </Center>
             <div className="row form-group">
-              <div className="col-sm-4">
+              <div className="col-sm-12">
                 <input
-                  type="text"
+                  type="file"
                   className="form-control"
-                  name="email"
-                  placeholder="email"
-                  {...register('email', { required: true, disabled: true })}
+                  name="photo"
+                  placeholder="Upload Photo"
+                  onChange={uploadPhoto}
                 />
               </div>
             </div>
-
-            <div className="row form-group">
-              <div className="col-sm-4">
-                <input
-                  type="text"
-                  className="form-control"
-                  name="name"
-                  placeholder="Name"
-                  {...register('name', { required: true, disabled: true })}
-                />
-                <span className="form-error">
-                  {errors.name && 'name is required'}
-                </span>
+            <form className="user" onSubmit={handleSubmit(onSubmit)}>
+              <div className="row form-group">
+                <div className="col-sm-12">
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="email"
+                    placeholder="email"
+                    {...register('email', { required: true, disabled: true })}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="row form-group">
-              <div className="col-sm-4">
-                <select
-                  className="form-control"
-                  name="country"
-                  {...register('country', { required: true })}
-                  onChange={onChange}
-                >
-                  <option value="">Select Country</option>
-                  {option}
-                </select>
-                <span className="form-error">
-                  {errors.country && 'Country is required'}
-                </span>
+              <div className="row form-group">
+                <div className="col-sm-12">
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="name"
+                    placeholder="Name"
+                    {...register('name', { required: true, disabled: true })}
+                  />
+                  <span className="form-error">
+                    {errors.name && 'name is required'}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className="row form-group">
-              <div className="col-sm-4">
-                <select
-                  className="form-control"
-                  name="country"
-                  {...register('currency', { required: true })}
-                >
-                  <option value="">Select currency</option>
-                  {optionCurrency}
-                </select>
-                <span className="form-error">
-                  {errors.currency && 'Currency is required'}
-                </span>
+              <div className="row form-group">
+                <div className="col-sm-12">
+                  <select
+                    className="form-control"
+                    name="country"
+                    {...register('country', { required: true })}
+                    onChange={onChange}
+                  >
+                    <option value="">Select Country</option>
+                    {option}
+                  </select>
+                  <span className="form-error">
+                    {errors.country && 'Country is required'}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className="row form-group">
-              <div className="col-sm-4">
-                <a
-                  className="small"
-                  href="/"
-                  role="button"
-                  onClick={() => setOpened(true)}
-                >
-                  Change Password
-                </a>
+              <div className="row form-group">
+                <div className="col-sm-12">
+                  <select
+                    className="form-control"
+                    name="country"
+                    {...register('currency', { required: true })}
+                  >
+                    <option value="">Select currency</option>
+                    {optionCurrency}
+                  </select>
+                  <span className="form-error">
+                    {errors.currency && 'Currency is required'}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <hr />
-            <Flex
-              mih={50}
-              gap="md"
-              justify="center"
-              align="center"
-              direction="row"
-              wrap="wrap"
-            >
-              <Button type="submit" loading={isLoading}>
-                Save
-              </Button>
-              <Button onClick={onCancel} color="red">
-                Cancel
-              </Button>
-            </Flex>
-          </form>
+              <div className="row form-group">
+                <div className="col-sm-12">
+                  <a
+                    className="small"
+                    href="/"
+                    role="button"
+                    onClick={() => setOpened(true)}
+                  >
+                    Change Password
+                  </a>
+                </div>
+              </div>
+
+              <hr />
+              <Flex
+                mih={50}
+                gap="md"
+                justify="center"
+                align="center"
+                direction="row"
+                wrap="wrap"
+              >
+                <Button type="submit" loading={isLoading}>
+                  Save
+                </Button>
+                <Button onClick={onCancel} color="red">
+                  Cancel
+                </Button>
+              </Flex>
+            </form>
+          </Col>
+        </Grid>
         </div>
       </div>
       <ModalChangePass opened={opened} setOpened={setOpened} />

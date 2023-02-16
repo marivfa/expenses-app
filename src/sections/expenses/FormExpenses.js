@@ -1,30 +1,28 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { Select, Button, Flex } from '@mantine/core'
+import { Select, Button, Flex, Modal} from '@mantine/core'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { GetAll, Save } from '../../commons/Api'
 import '../../style.css'
 
-export default function FormExpenses() {
-  const { id } = useParams()
-  const isAdd = !id
+export default function FormExpenses({ opened, setOpened, loadMore , id}) {
+  
   const {
     register,
     formState: { errors },
     handleSubmit,
     setValue,
+    reset,
   } = useForm()
 
   const [categoryId, setCategoryId] = useState(0)
   const [category, setCategory] = useState([])
   const [showForm, setShowForm] = useState(false)
-  const [isLoading, setLoading] = useState(false)
-
-  const navigate = useNavigate()
+  const [isLoading, setIsLoading] = useState(false)
 
   const onCancel = () => {
-    navigate('/expenses')
+      reset()
+      setOpened(false)
   }
 
   const handleChangeForm = id => {
@@ -34,13 +32,13 @@ export default function FormExpenses() {
     })
   }
 
-  const handleCheckClick = () => {
+  /*const handleCheckClick = () => {
     setShowForm(!showForm)
-  }
+  }*/
 
   //Save Expenses
   const onSubmit = async data => {
-    setLoading(true)
+    setIsLoading(true)
     const method = id ? 'PUT' : 'POST'
     //delete data.id
     //delete data.status
@@ -62,14 +60,18 @@ export default function FormExpenses() {
     const res = await Save(URL, method, data)
     if (res) {
       toast.success('Submitted successfully')
-      onCancel()
+      reset()
+      setOpened(false)
+      setCategoryId(0)
+      await loadMore(0)
     } else {
       toast.error(`Form submit error ${res.error} `)
     }
-    setLoading(false)
+    setIsLoading(false)
   }
 
   const getExpenses = async () => {
+    setIsLoading(true)
     const res = await GetAll(`expenses/${id}`)
     if (res) {
       Object.entries(res).forEach(([key, value]) => {
@@ -79,6 +81,7 @@ export default function FormExpenses() {
         }
       })
     }
+    setIsLoading(false)
   }
 
   const getCategory = async () => {
@@ -100,11 +103,11 @@ export default function FormExpenses() {
 
   //Get One Expenses -- Edit
   useEffect(() => {
-    if (!isAdd) {
+    if (id > 0) {
       getExpenses()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [id])
 
   //Get Category -- Autocomplete
   useEffect(() => {
@@ -112,16 +115,16 @@ export default function FormExpenses() {
   }, [])
 
   return (
-    <div className="card shadow mb-4">
-      <div className="card-header py-3">
-        <h6 className="m-0 font-weight-bold text-primary">
-          {isAdd ? 'Add' : 'Edit'} Expenses
-        </h6>
-      </div>
-      <div className="card-body">
+    <Modal
+        centered
+        opened={opened}
+        onClose={() => setOpened(false)}
+        withCloseButton={true}
+        title={id === 0 ? 'Add Expenses' : 'Edit Expenses'}
+      >
         <form className="user" onSubmit={handleSubmit(onSubmit)}>
           <div className="row form-group">
-            <div className="col-sm-6">
+            <div className="col-sm-12">
               <Select
                 label="Select Category"
                 placeholder="Pick one"
@@ -136,11 +139,9 @@ export default function FormExpenses() {
                 {errors.category_id && 'Category is required'}
               </span>
             </div>
-            <div className="col-sm-6"></div>
           </div>
           <div className="row form-group">
-            <div className="col-sm-6">
-              
+            <div className="col-sm-12">
             <input
                 type="number"
                 className="form-control"
@@ -153,12 +154,9 @@ export default function FormExpenses() {
                 {errors.amount && 'Amount is required'}
               </span>
             </div>
-            <div className="col-sm-6"></div>
           </div>
-
           <div className="row form-group">
-            <div className="col-sm-6">
-
+            <div className="col-sm-12">
               Real Date
               <input
                 type="date"
@@ -174,7 +172,7 @@ export default function FormExpenses() {
           </div>
 
           <div className="row form-group">
-            <div className="col-sm-6">
+            <div className="col-sm-12">
               <input
                 type="text"
                 className="form-control"
@@ -183,11 +181,31 @@ export default function FormExpenses() {
                 {...register('comment')}
               />
             </div>
-            <div className="col-sm-6"></div>
           </div>
+          <hr />
+          <Flex
+            mih={50}
+            gap="md"
+            justify="center"
+            align="center"
+            direction="row"
+            wrap="wrap"
+          >
+            <Button type="submit" loading={isLoading}>
+              Save
+            </Button>
+            <Button onClick={onCancel} color="red">
+              Cancel
+            </Button>
+          </Flex>
+        </form>
+    </Modal>
+  )
+}
 
-          <div className="row form-group">
-            <div className="col-sm-6">
+/*
+<div className="row form-group">
+            <div className="col-sm-12">
               <span>Mark as reminder</span>
               <input
                 className="form-control"
@@ -196,7 +214,6 @@ export default function FormExpenses() {
                 onClick={handleCheckClick}
               />
             </div>
-            <div className="col-sm-6"></div>
           </div>
 
           {showForm && (
@@ -252,24 +269,4 @@ export default function FormExpenses() {
             </div>
           )}
 
-          <hr />
-          <Flex
-            mih={50}
-            gap="md"
-            justify="center"
-            align="center"
-            direction="row"
-            wrap="wrap"
-          >
-            <Button type="submit" loading={isLoading}>
-              Save
-            </Button>
-            <Button onClick={onCancel} color="red">
-              Cancel
-            </Button>
-          </Flex>
-        </form>
-      </div>
-    </div>
-  )
-}
+*/

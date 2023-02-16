@@ -27,7 +27,7 @@ export default function CardList({ data }) {
       {data.length > 0 ? (
         <ListGroup as="ol">{listItem}</ListGroup>
       ) : (
-        <h5>No reminders to show</h5>
+        <Text ta="center">No reminders to show</Text>
       )}
     </div>
   )

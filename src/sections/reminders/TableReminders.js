@@ -1,15 +1,12 @@
-import { useEffect, useState, useContext } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Table, Button ,LoadingOverlay, Flex} from '@mantine/core';
-import { Edit, Trash } from 'tabler-icons-react';
-import { Delete, GetAll } from '../../commons/Api'
-import { toast } from 'react-toastify'
+import { useContext } from 'react'
+import { Table, Button ,LoadingOverlay, Flex} from '@mantine/core'
+import { Edit, Trash , FileInfo} from 'tabler-icons-react'
 import { InfiniteScroll } from 'react-simple-infinite-scroll'
 import { UsersContext } from '../../context/UsersContext'
 import '../../style.css'
 
 
-export default function TableReminders() {
+export default function TableReminders({items, isLoading, cursor, loadMore, onDel, onEdit, onDet}) {
   const cols = [
     { header: 'Date Register', field: 'date_register', type: 'date' },
     { header: 'Description', field: 'description', type: 'text' },
@@ -19,53 +16,6 @@ export default function TableReminders() {
   ]
 
   const [currentUser] = useContext(UsersContext)
-  const [items, setItems] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [cursor, setCursor] = useState(0)
-  const [error, setError] = useState()
-  const [isDelete, setIsDelete] = useState(false)
-
-  const navigate = useNavigate()
-  const onEdit = id => {
-    navigate(`/reminders/edit/${id}`)
-  }
-
-  //BtnDelete
-  const onDel = async id => {
-    const res = await Delete(`remainders/${id}`)
-    if (res) {
-      toast.success('Reminders Deleted')
-      setItems([])
-      setCursor(0)
-      setIsDelete(true)
-    }
-  }
-
-  useEffect(() => {
-    loadMore()
-  }, [isDelete])
-
-  useEffect(() => {
-    loadMore()
-  }, [])
-
-  const loadMore = () => {
-    setIsDelete(false)
-    setIsLoading(true)
-    setError(undefined)
-
-    GetAll(`remainders?limit=20&offset=${cursor}`).then(
-      res => {
-        setItems([...items, ...res.items])
-        setCursor(res.offset + 10)
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-        setError(error)
-      }
-    )
-  }
 
   const rows = items?.map((detail, index) => {
     return (
@@ -87,6 +37,13 @@ export default function TableReminders() {
                 direction="row"
                 wrap="wrap"
               >
+                <Button
+                  leftIcon={<FileInfo />}
+                  onClick={() => onDet(detail.id)}
+                  color="indigo"
+                  variant="subtle"
+                  compact
+                ></Button>
                 <Button
                   leftIcon={<Edit />}
                   onClick={() => onEdit(detail.id)}

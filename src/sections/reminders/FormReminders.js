@@ -1,21 +1,18 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import '../../style.css'
-
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import { Button, Flex } from '@mantine/core'
+import { Button, Flex , Modal} from '@mantine/core'
 import { GetAll, Save } from '../../commons/Api'
+import '../../style.css'
 
-export default function FormReminders() {
-  const { id } = useParams()
-  const isAdd = !id
+export default function FormReminders({ opened, setOpened, loadMore , id}) {
   const {
     register,
     formState: { errors },
     handleSubmit,
     watch,
     setValue,
+    reset,
   } = useForm()
 
   const frecuency = register('frecuency')
@@ -25,17 +22,16 @@ export default function FormReminders() {
   const [showSelectDay, setShowSelectDay] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const navigate = useNavigate()
-
   const onCancel = () => {
-    navigate('/reminders')
+      reset()
+      setOpened(false)
   }
 
   const handleChange = e => {
     setShowSelectDay(false)
-    if (myValue === 'weekly') {
+    /*if (myValue === 'weekly') {
       setShowSelectDay(!showSelectDay)
-    }
+    }*/
   }
 
   useEffect(() => {
@@ -44,7 +40,7 @@ export default function FormReminders() {
   }, [myValue])
 
   //Save Reminders
-  const onSubmit = data => {
+  const onSubmit = async data => {
     const method = id ? 'PUT' : 'POST'
      data.id_user = 0
     if(data.frecuency === 'none'){
@@ -52,41 +48,48 @@ export default function FormReminders() {
     }
 
     const URL = id ? `remainders/${id}` : 'remainders'
-    Save(URL, method, data).then(res => {
-      if (res) {
-        toast.success('Submitted successfully')
-        onCancel()
-      } else {
-        toast.error(`Form submit error ${res.error} `)
-      }
-    })
+    const res = await Save(URL, method, data)
+    if (res) {
+      toast.success('Submitted successfully')
+      reset()
+      setOpened(false)
+      await loadMore(0)
+    } else {
+      toast.error(`Form submit error ${res.error} `)
+    }
   }
+
+  const getReminder = async () => {
+    setIsLoading(true)
+    const res = await GetAll(`remainders/${id}`)
+    if (res) {
+      Object.entries(res).forEach(([key, value]) => {
+        setValue(key, value)
+      })
+    }
+    setIsLoading(false)
+  }
+
 
   //Get One Reminders -- Edit
   useEffect(() => {
-    if (!isAdd) {
-      GetAll(`remainders/${id}`).then(res => {
-        if (res) {
-          Object.entries(res).forEach(([key, value]) => {
-            setValue(key, value)
-          })
-        }
-      })
+    if (id > 0) {
+      getReminder()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [id])
 
   return (
-    <div className="card shadow mb-4">
-      <div className="card-header py-3">
-        <h6 className="m-0 font-weight-bold text-primary">
-          {isAdd ? 'Add' : 'Edit'} Reminders
-        </h6>
-      </div>
-      <div className="card-body">
+    <Modal
+        centered
+        opened={opened}
+        onClose={() => setOpened(false)}
+        withCloseButton={true}
+        title={id === 0 ? 'Add Reminder' : 'Edit Reminder'}
+      >
         <form className="user" onSubmit={handleSubmit(onSubmit)}>
           <div className="row form-group">
-            <div className="col-sm-6">
+            <div className="col-sm-12">
               <input
                 type="text"
                 className="form-control"
@@ -100,7 +103,7 @@ export default function FormReminders() {
             </div>
           </div>
           <div className="row form-group">
-            <div className="col-sm-6">
+            <div className="col-sm-12">
               <select
                 className="form-control"
                 aria-label="Frecuency"
@@ -115,7 +118,6 @@ export default function FormReminders() {
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
-                <option value="annual">Annual</option>
               </select>
               <span className="form-error">
                 {errors.frecuency && 'Frecuency is required'}
@@ -151,7 +153,7 @@ export default function FormReminders() {
           )}
 
           <div className="row form-group">
-            <div className="col-sm-6">
+            <div className="col-sm-12">
               Reminder Date
               <input
                 type="date"
@@ -167,7 +169,7 @@ export default function FormReminders() {
           </div>
 
           <div className="row form-group">
-            <div className="col-sm-6">
+            <div className="col-sm-12">
               Until Date
               <input
                 type="date"
@@ -198,7 +200,6 @@ export default function FormReminders() {
             </Button>
           </Flex>
         </form>
-      </div>
-    </div>
+      </Modal>
   )
 }
