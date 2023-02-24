@@ -1,12 +1,12 @@
-import { useContext } from 'react'
+import { useContext} from 'react'
 import { Table, Button, LoadingOverlay, Flex } from '@mantine/core'
 import { FileSpreadsheet, Edit, Trash } from 'tabler-icons-react'
 import { InfiniteScroll } from 'react-simple-infinite-scroll'
 import { UsersContext } from '../../context/UsersContext'
-
+ 
 import '../../style.css'
 
-export default function TableExpenses({items, isLoading, cursor, loadMore, onDel, onExcel, onEdit}) {
+export default function TableExpenses({items, isLoading, cursor, loadMore, onDel, onExcel, onEdit, infiniteScrollRef}) {
   
   const [currentUser] = useContext(UsersContext)
 
@@ -67,13 +67,13 @@ export default function TableExpenses({items, isLoading, cursor, loadMore, onDel
     return <th key={index}>{column.header}</th>
   })
 
+
   return (
     <div className="card shadow mb-4">
       <div className="card-header py-3">
         <h6 className="m-0 font-weight-bold text-primary">Expenses</h6>
       </div>
       <div className="card-body">
-        <div className="table-responsive">
           <LoadingOverlay
             visible={isLoading}
             overlayBlur={2}
@@ -85,31 +85,34 @@ export default function TableExpenses({items, isLoading, cursor, loadMore, onDel
             isLoading={isLoading}
             hasMore={!!cursor}
             onLoadMore={loadMore}
+            ref={infiniteScrollRef}
           >
             <Table striped>
               <thead>
                 <tr>
                   {columns}
-                  <td></td>
                 </tr>
               </thead>
               <tbody>{rows}</tbody>
             </Table>
           </InfiniteScroll>
-        </div>
-        {items.length > 0 && (
-          <div>
-            <hr />
-            <h4>No more data to show</h4>
-            <Button
-              leftIcon={<FileSpreadsheet />}
-              onClick={() => onExcel()}
-              variant="white"
-            >
-              Download
-            </Button>
-          </div>
-        )}
+          {items.length === 0 && (
+            <div>
+              <hr />
+              <h4>No data to show</h4>
+            </div>
+          )}
+          {items.length > 0 && (
+            <div>
+              <Button
+                leftIcon={<FileSpreadsheet />}
+                onClick={() => onExcel()}
+                variant="white"
+              >
+                Download
+              </Button>
+            </div>
+          )}
       </div>
     </div>
   )

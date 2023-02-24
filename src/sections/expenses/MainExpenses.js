@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState , useRef} from 'react'
 import { Button} from '@mantine/core';
 import { SquarePlus} from 'tabler-icons-react';
 import { toast } from 'react-toastify'
@@ -15,6 +15,7 @@ export default function MainExpenses() {
   const [isDelete, setIsDelete] = useState(false)
   const [cursor, setCursor] = useState(0)
   const [id, setId] = useState(0)
+  const infiniteScrollRef = useRef(null);
 
   const onEdit = (id) => {
     setId(id)
@@ -87,10 +88,21 @@ export default function MainExpenses() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDelete])
 
-  useEffect(() => {
+  /*useEffect(() => {
     loadMore()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [])*/
+
+
+  useEffect(() => {
+    //if (infiniteScrollRef.current) {
+      // Call the reset method of the InfiniteScroll component when the component unmounts
+      //infiniteScrollRef.current.reset();
+    //}
+    return () => {
+      infiniteScrollRef.current = null;
+    }
+  }, []);
 
   return (
     <>
@@ -100,7 +112,7 @@ export default function MainExpenses() {
         </Button>
       </div>
       <hr />
-      <TableExpenses items={items} isLoading={isLoading} cursor={cursor} loadMore={loadMore} onDel={onDel} onExcel={onExcel} onEdit={onEdit}/>
+      <TableExpenses items={items} isLoading={isLoading} cursor={cursor} loadMore={loadMore} onDel={onDel} onExcel={onExcel} onEdit={onEdit} infiniteScrollRef={infiniteScrollRef}/>
       <FormExpenses opened={opened} setOpened={setOpened} loadMore={loadMore} id={id}/>
     </>
   )

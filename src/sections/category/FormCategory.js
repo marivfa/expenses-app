@@ -1,19 +1,26 @@
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import { Button, Flex , Modal} from '@mantine/core'
+import { Button, Flex, Modal, SimpleGrid } from '@mantine/core'
+import { useForm, Controller } from 'react-hook-form'
 import { GetAll, Save } from '../../commons/Api'
+import { InputText, InputSelect } from '../../components/Inputs'
 import '../../style.css'
 
-export default function FormCategory({ opened, setOpened, getDataCat , id}) {
+export default function FormCategory({ opened, setOpened, getDataCat, id }) {
   const [isLoading, setIsLoading] = useState(false)
+
   const {
-    register,
-    formState: { errors },
+    control,
     handleSubmit,
     setValue,
     reset,
-  } = useForm()
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      description: '',
+      type: '',
+    },
+  })
 
   //Save Category
   const onSubmit = async data => {
@@ -35,7 +42,7 @@ export default function FormCategory({ opened, setOpened, getDataCat , id}) {
 
   const getCategory = async () => {
     setIsLoading(true)
-    
+
     const res = await GetAll(`category/${id}`)
     if (res) {
       Object.entries(res).forEach(([key, value]) => {
@@ -43,11 +50,6 @@ export default function FormCategory({ opened, setOpened, getDataCat , id}) {
       })
     }
     setIsLoading(false)
-  }
-  
-  const onCancel = () => {
-      reset()
-      setOpened(false)
   }
 
   //Get One Category -- Edit
@@ -60,61 +62,88 @@ export default function FormCategory({ opened, setOpened, getDataCat , id}) {
 
   return (
     <Modal
-        centered
-        opened={opened}
-        onClose={() => setOpened(false)}
-        withCloseButton={true}
-        title={id === 0 ? 'Add Category' : 'Edit Category'}
-      >
-        <form className="user" onSubmit={handleSubmit(onSubmit)}>
-          <div className="row form-group">
-            <div className="col-sm-12">
-              <input
-                type="text"
-                className="form-control"
-                name="Description"
-                placeholder="Description"
-                {...register('description', { required: true })}
-              />
-              <span className="form-error">
-                {errors.description && 'description is required'}
-              </span>
-            </div>
-           </div> 
-           <div className="row form-group">
-            <div className="col-sm-12">
-              <label>Type</label>
-              <select
-                className="form-control"
-                name="type"
-                {...register('type', { required: true })}
-              >
-                <option value="fixed">Fixed</option>
-                <option value="flex">Flex</option>
-                <option value="other">Other</option>
-              </select>
-              <span className="form-error">
-                {errors.type && 'Type is required'}
-              </span>
-            </div>
+      centered
+      opened={opened}
+      onClose={() => setOpened(false)}
+      withCloseButton={true}
+      title={id === 0 ? 'Add Category' : 'Edit Category'}
+    >
+      <form className="user" onSubmit={handleSubmit(onSubmit)}>
+        <SimpleGrid cols={1} spacing="xs" verticalSpacing="xs">
+          <div>
+            <Controller
+              name="type"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                validate: value => value !== '',
+              }}
+              render={({ field }) => (
+                <InputSelect
+                  label="Select type"
+                  placeholder="Pick one"
+                  data={[
+                    { value: 'fixed', label: 'Fixed' },
+                    { value: 'flex', label: 'Flex' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                  field={field}
+                />
+              )}
+            />
+            <span className="form-error">
+              {errors.type && 'Type is required'}
+            </span>
           </div>
-          <hr />
-          <Flex
-            mih={50}
-            gap="md"
-            justify="center"
-            align="center"
-            direction="row"
-            wrap="wrap"
+          <div>
+            <Controller
+              name="description"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                validate: value => value !== '',
+              }}
+              render={({ field }) => (
+                <InputText
+                  label="Description"
+                  placeholder="Description"
+                  field={field}
+                />
+              )}
+            />
+            <span className="form-error">
+              {errors.description && 'Description is required'}
+            </span>
+          </div>
+        </SimpleGrid>
+
+        <hr />
+        <Flex
+          mih={50}
+          gap="md"
+          justify="center"
+          align="center"
+          direction="row"
+          wrap="wrap"
+        >
+          <Button type="submit" loading={isLoading}>
+            Save
+          </Button>
+          <Button
+            color="red"
+            onClick={() => {
+              setOpened(false)
+              reset()
+            }}
           >
-            <Button type="submit" loading={isLoading}>
-              Save
-            </Button>
-            <Button onClick={onCancel} color="red">
-              Cancel
-            </Button>
-          </Flex>
-        </form>
+            Cancel
+          </Button>
+        </Flex>
+      </form>
     </Modal>
   )
 }

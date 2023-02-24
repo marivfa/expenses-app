@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState , useRef} from 'react'
 import { Button} from '@mantine/core';
 import { SquarePlus} from 'tabler-icons-react';
 import { toast } from 'react-toastify'
@@ -16,6 +16,7 @@ export default function MainReminders() {
   const [isDelete, setIsDelete] = useState(false)
   const [cursor, setCursor] = useState(0)
   const [id, setId] = useState(0)
+  const infiniteScrollRef = useRef(null);
 
   const onEdit = id => {
     setId(id)
@@ -62,9 +63,19 @@ export default function MainReminders() {
     loadMore()
   }, [isDelete])
 
-  useEffect(() => {
+  /*useEffect(() => {
     loadMore()
-  }, [])
+  }, [])*/
+
+  useEffect(() => {
+    //if (infiniteScrollRef.current) {
+      // Call the reset method of the InfiniteScroll component when the component unmounts
+      //infiniteScrollRef.current.reset();
+    //}
+    return () => {
+      infiniteScrollRef.current = null;
+    }
+  }, []);
 
   return (
     <div>
@@ -74,7 +85,7 @@ export default function MainReminders() {
         </Button>
       </div>
       <hr />
-      <TableReminders items={items} isLoading={isLoading} cursor={cursor} loadMore={loadMore} onDel={onDel} onEdit={onEdit} onDet={onDet}/>
+      <TableReminders items={items} isLoading={isLoading} cursor={cursor} loadMore={loadMore} onDel={onDel} onEdit={onEdit} onDet={onDet} infiniteScrollRef={infiniteScrollRef}/>
       <FormReminders opened={opened} setOpened={setOpened} loadMore={loadMore} id={id}/>
       <ModalRemindersDetail opened={openedDet} setOpened={setOpenedDet} id={id}/>
     </div>

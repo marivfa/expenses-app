@@ -228,9 +228,9 @@ svg {
   vertical-align: middle;
 }
 
-table {
+/*table {
   border-collapse: collapse;
-}
+}*/
 
 caption {
   padding-top: 0.75rem;
@@ -240,10 +240,10 @@ caption {
   caption-side: bottom;
 }
 
-th {
+/*th {
   text-align: inherit;
   text-align: -webkit-match-parent;
-}
+}*/
 
 label {
   display: inline-block;
@@ -11783,6 +11783,8 @@ body.sidebar-toggled footer.sticky-footer {
 
 .form-error {
   color: var(--danger);
+  font-size: 0.8rem;
+
 }
 
 .app-title{

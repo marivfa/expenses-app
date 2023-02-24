@@ -6,7 +6,7 @@ import { UsersContext } from '../../context/UsersContext'
 import '../../style.css'
 
 
-export default function TableReminders({items, isLoading, cursor, loadMore, onDel, onEdit, onDet}) {
+export default function TableReminders({items, isLoading, cursor, loadMore, onDel, onEdit, onDet, infiniteScrollRef}) {
   const cols = [
     { header: 'Date Register', field: 'date_register', type: 'date' },
     { header: 'Description', field: 'description', type: 'text' },
@@ -87,19 +87,19 @@ export default function TableReminders({items, isLoading, cursor, loadMore, onDe
             isLoading={isLoading}
             hasMore={!!cursor}
             onLoadMore={loadMore}
+            ref={infiniteScrollRef}
           >
             <Table striped>
               <thead>
                 <tr>
                   {columns}
-                  <td></td>
                 </tr>
               </thead>
               <tbody>{rows}</tbody>
             </Table>
           </InfiniteScroll>
         </div>
-        {items.length > 0 && <div><hr /><h4>No more data to show</h4></div>}
+        {items.length === 0 && <div><hr /><h4>No data to show</h4></div>}
       </div>
     </div>
   )

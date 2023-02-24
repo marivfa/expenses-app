@@ -1,50 +1,50 @@
 import { useEffect, useState } from 'react'
-import { Select, Button, Flex, Modal} from '@mantine/core'
-import { useForm } from 'react-hook-form'
+import { Button, Flex, Modal, SimpleGrid } from '@mantine/core'
+import { useForm, Controller } from 'react-hook-form'
+import moment from 'moment'
 import { toast } from 'react-toastify'
 import { GetAll, Save } from '../../commons/Api'
+
+import {
+  InputText,
+  InputDate,
+  InputNumber,
+  InputSelect,
+} from '../../components/Inputs'
+
 import '../../style.css'
 
-export default function FormExpenses({ opened, setOpened, loadMore , id}) {
-  
+export default function FormExpenses({ opened, setOpened, loadMore, id }) {
   const {
-    register,
-    formState: { errors },
+    control,
     handleSubmit,
     setValue,
     reset,
-  } = useForm()
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      id_category: 0,
+      amount: 0,
+      real_date: new Date(),
+      comment: '',
+    },
+  })
 
-  const [categoryId, setCategoryId] = useState(0)
   const [category, setCategory] = useState([])
-  const [showForm, setShowForm] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-
-  const onCancel = () => {
-      reset()
-      setOpened(false)
-  }
-
-  const handleChangeForm = id => {
-    setCategoryId(id)
-    setValue('id_category', id, {
-      shouldValidate: true,
-    })
-  }
-
-  /*const handleCheckClick = () => {
-    setShowForm(!showForm)
-  }*/
 
   //Save Expenses
   const onSubmit = async data => {
+    data.id_user = 0
+    const values = {
+      ...data,
+      real_date: moment(data.real_date).format('YYYY-MM-DD'), // format the date value to match your backend format
+    }
+
     setIsLoading(true)
     const method = id ? 'PUT' : 'POST'
-    //delete data.id
-    //delete data.status
-    data.id_user = 0
 
-    if (showForm) {
+    /*if (showForm) {
       data.remainders = {
         description: data.description,
         frecuency: data.frecuency,
@@ -54,15 +54,14 @@ export default function FormExpenses({ opened, setOpened, loadMore , id}) {
       delete data.description
       delete data.frecuency
       delete data.until_date
-    }
+    }*/
 
     const URL = id ? `expenses/${id}` : 'expenses'
-    const res = await Save(URL, method, data)
+    const res = await Save(URL, method, values)
     if (res) {
       toast.success('Submitted successfully')
       reset()
       setOpened(false)
-      setCategoryId(0)
       await loadMore(0)
     } else {
       toast.error(`Form submit error ${res.error} `)
@@ -75,9 +74,12 @@ export default function FormExpenses({ opened, setOpened, loadMore , id}) {
     const res = await GetAll(`expenses/${id}`)
     if (res) {
       Object.entries(res).forEach(([key, value]) => {
-        setValue(key, value)
-        if (key === 'id_category') {
-          setCategoryId(value)
+        if (key === 'real_date') {
+          const date = moment(value).format('ddd MMM DD YYYY HH:mm:ss')
+          const newDate = new Date(date)
+          setValue(key, newDate)
+        } else {
+          setValue(key, value)
         }
       })
     }
@@ -87,7 +89,6 @@ export default function FormExpenses({ opened, setOpened, loadMore , id}) {
   const getCategory = async () => {
     const res = await GetAll('category')
     if (res) {
-      //setCategory(res)
       let arrCategory = []
       Object.entries(res).forEach(([key, value]) => {
         let objTmp = {
@@ -116,89 +117,114 @@ export default function FormExpenses({ opened, setOpened, loadMore , id}) {
 
   return (
     <Modal
-        centered
-        opened={opened}
-        onClose={() => setOpened(false)}
-        withCloseButton={true}
-        title={id === 0 ? 'Add Expenses' : 'Edit Expenses'}
-      >
-        <form className="user" onSubmit={handleSubmit(onSubmit)}>
-          <div className="row form-group">
-            <div className="col-sm-12">
-              <Select
-                label="Select Category"
-                placeholder="Pick one"
-                searchable
-                nothingFound="No options"
-                radius="xl"
-                onChange={handleChangeForm}
-                data={category}
-                value={categoryId}
-              />
-              <span className="form-error">
-                {errors.category_id && 'Category is required'}
-              </span>
-            </div>
+      centered
+      opened={opened}
+      onClose={() => setOpened(false)}
+      withCloseButton={true}
+      title={id === 0 ? 'Add Expenses' : 'Edit Expenses'}
+    >
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <SimpleGrid cols={1} spacing="xs" verticalSpacing="xs">
+          <div>
+            <Controller
+              name="id_category"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                validate: value => value > 0,
+              }}
+              render={({ field }) => (
+                <InputSelect
+                  label="Select Category"
+                  placeholder="Pick one"
+                  data={category}
+                  field={field}
+                />
+              )}
+            />
+            <span className="form-error">
+              {errors.id_category && 'Select a category'}
+            </span>
           </div>
-          <div className="row form-group">
-            <div className="col-sm-12">
-            <input
-                type="number"
-                className="form-control"
-                name="amount"
-                placeholder="Amount"
-                {...register('amount', { required: true ,valueAsNumber: true})}
-              />
-
-              <span className="form-error">
-                {errors.amount && 'Amount is required'}
-              </span>
-            </div>
+          <div>
+            <Controller
+              name="amount"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                validate: value => value > 0,
+              }}
+              render={({ field }) => (
+                <InputNumber label="Amount" field={field} />
+              )}
+            />
+            <span className="form-error">
+              {errors.amount && 'Amount must to be greater than 0'}
+            </span>
           </div>
-          <div className="row form-group">
-            <div className="col-sm-12">
-              Real Date
-              <input
-                type="date"
-                className="form-control"
-                name="real_date"
-                placeholder="Realdate Date"
-                {...register('real_date', { required: true })}
-              />
-              <span className="form-error">
-                {errors.real_date && 'Real Date is required'}
-              </span>
-            </div>
+          <div>
+            <Controller
+              name="real_date"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                valueAsDate: true,
+              }}
+              render={({ field }) => (
+                <InputDate
+                  placeholder="Pick real date"
+                  label="Real date"
+                  field={field}
+                />
+              )}
+            />
+            <span className="form-error">
+              {errors.real_date && 'Pick up a date'}
+            </span>
           </div>
-
-          <div className="row form-group">
-            <div className="col-sm-12">
-              <input
-                type="text"
-                className="form-control"
-                name="comment"
-                placeholder="Comment"
-                {...register('comment')}
-              />
-            </div>
+          <div>
+            <Controller
+              name="comment"
+              control={control}
+              render={({ field }) => (
+                <InputText
+                  label="Comment"
+                  placeholder="Comment"
+                  field={field}
+                />
+              )}
+            />
           </div>
-          <hr />
-          <Flex
-            mih={50}
-            gap="md"
-            justify="center"
-            align="center"
-            direction="row"
-            wrap="wrap"
+        </SimpleGrid>
+        <hr />
+        <Flex
+          mih={50}
+          gap="md"
+          justify="center"
+          align="center"
+          direction="row"
+          wrap="wrap"
+        >
+          <Button type="submit" loading={isLoading}>
+            Save
+          </Button>
+          <Button
+            color="red"
+            onClick={() => {
+              setOpened(false)
+              reset()
+            }}
           >
-            <Button type="submit" loading={isLoading}>
-              Save
-            </Button>
-            <Button onClick={onCancel} color="red">
-              Cancel
-            </Button>
-          </Flex>
-        </form>
+            Cancel
+          </Button>
+        </Flex>
+      </form>
     </Modal>
   )
 }

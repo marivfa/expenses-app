@@ -1,54 +1,45 @@
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'react-toastify'
-import { Button, Flex , Modal} from '@mantine/core'
+import { Button, Flex, Modal, SimpleGrid } from '@mantine/core'
+import moment from 'moment'
 import { GetAll, Save } from '../../commons/Api'
+import { InputText, InputDate, InputSelect } from '../../components/Inputs'
 import '../../style.css'
 
-export default function FormReminders({ opened, setOpened, loadMore , id}) {
+export default function FormReminders({ opened, setOpened, loadMore, id }) {
   const {
-    register,
-    formState: { errors },
+    control,
     handleSubmit,
-    watch,
     setValue,
     reset,
-  } = useForm()
-
-  const frecuency = register('frecuency')
-  const myValue = watch('frecuency', 'default')
-
-  const [slcFrecuencyValue, setSlcFrecuencyValue] = useState()
-  const [showSelectDay, setShowSelectDay] = useState(false)
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      description: '',
+      frecuency: '',
+      remainder_date: new Date(),
+      until_date: new Date(),
+    },
+  })
   const [isLoading, setIsLoading] = useState(false)
-
-  const onCancel = () => {
-      reset()
-      setOpened(false)
-  }
-
-  const handleChange = e => {
-    setShowSelectDay(false)
-    /*if (myValue === 'weekly') {
-      setShowSelectDay(!showSelectDay)
-    }*/
-  }
-
-  useEffect(() => {
-    handleChange()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [myValue])
 
   //Save Reminders
   const onSubmit = async data => {
     const method = id ? 'PUT' : 'POST'
-     data.id_user = 0
-    if(data.frecuency === 'none'){
+    data.id_user = 0
+    if (data.frecuency === 'none') {
       data.until_date = data.remainder_date
     }
 
+    const values = {
+      ...data,
+      until_date: moment(data.until_date).format('YYYY-MM-DD'), // format the date value to match your backend format
+      remainder_date: moment(data.remainder_date).format('YYYY-MM-DD'),
+    }
+
     const URL = id ? `remainders/${id}` : 'remainders'
-    const res = await Save(URL, method, data)
+    const res = await Save(URL, method, values)
     if (res) {
       toast.success('Submitted successfully')
       reset()
@@ -64,12 +55,17 @@ export default function FormReminders({ opened, setOpened, loadMore , id}) {
     const res = await GetAll(`remainders/${id}`)
     if (res) {
       Object.entries(res).forEach(([key, value]) => {
-        setValue(key, value)
+        if (key === 'until_date' || key === 'remainder_date') {
+          const date = moment(value).format('ddd MMM DD YYYY HH:mm:ss')
+          const newDate = new Date(date)
+          setValue(key, newDate)
+        } else {
+          setValue(key, value)
+        }
       })
     }
     setIsLoading(false)
   }
-
 
   //Get One Reminders -- Edit
   useEffect(() => {
@@ -81,125 +77,134 @@ export default function FormReminders({ opened, setOpened, loadMore , id}) {
 
   return (
     <Modal
-        centered
-        opened={opened}
-        onClose={() => setOpened(false)}
-        withCloseButton={true}
-        title={id === 0 ? 'Add Reminder' : 'Edit Reminder'}
-      >
-        <form className="user" onSubmit={handleSubmit(onSubmit)}>
-          <div className="row form-group">
-            <div className="col-sm-12">
-              <input
-                type="text"
-                className="form-control"
-                name="description"
-                placeholder="Description"
-                {...register('description', { required: true })}
-              />
-              <span className="form-error">
-                {errors.description && 'Description is required'}
-              </span>
-            </div>
-          </div>
-          <div className="row form-group">
-            <div className="col-sm-12">
-              <select
-                className="form-control"
-                aria-label="Frecuency"
-                onChange={handleChange}
-                onBlur={frecuency.onBlur}
-                ref={frecuency.ref}
-                name={frecuency.name}
-                {...register('frecuency', { required: true })}
-              >
-                <option>Select Frecuency</option>
-                <option value="none">None</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-              </select>
-              <span className="form-error">
-                {errors.frecuency && 'Frecuency is required'}
-              </span>
-            </div>
+      centered
+      opened={opened}
+      onClose={() => setOpened(false)}
+      withCloseButton={true}
+      title={id === 0 ? 'Add Reminder' : 'Edit Reminder'}
+    >
+      <form className="user" onSubmit={handleSubmit(onSubmit)}>
+        <SimpleGrid cols={1} spacing="xs" verticalSpacing="xs">
+          <div>
+            <Controller
+              name="description"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                validate: value => value !== '',
+              }}
+              render={({ field }) => (
+                <InputText
+                  label="Description"
+                  placeholder="Description"
+                  field={field}
+                />
+              )}
+            />
+            <span className="form-error">
+              {errors.description && 'Description is required'}
+            </span>
           </div>
 
-          {showSelectDay && (
-            <div>
-              <div className="row form-group">
-                <div className="col-sm-6">
-                  <select
-                    className="form-control"
-                    name="repeat"
-                    aria-label="Repeat"
-                    {...register('repeat', { required: true })}
-                  >
-                    <option>Select Day</option>
-                    <option value="monday">Monday</option>
-                    <option value="tuesday">Tuesday</option>
-                    <option value="wednesday">Wednesday</option>
-                    <option value="thursday">Thursday</option>
-                    <option value="friday">Friday</option>
-                    <option value="saturday">Saturday</option>
-                    <option value="sunday">Sunday</option>
-                  </select>
-                  <span className="form-error">
-                    {errors.repeat && 'Repeat is required'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="row form-group">
-            <div className="col-sm-12">
-              Reminder Date
-              <input
-                type="date"
-                className="form-control"
-                name="remainder_date"
-                placeholder="Reminder Date"
-                {...register('remainder_date', { required: true })}
-              />
-              <span className="form-error">
-                {errors.remainder_date && 'Reminder Date is required'}
-              </span>
-            </div>
+          <div>
+            <Controller
+              name="frecuency"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                validate: value => value !== '',
+              }}
+              render={({ field }) => (
+                <InputSelect
+                  label="Select Frecuency"
+                  placeholder="Pick one"
+                  data={[
+                    { value: 'none', label: 'None' },
+                    { value: 'daily', label: 'Daily' },
+                    { value: 'weekly', label: 'Weekly' },
+                    { value: 'monthly', label: 'Monthly' },
+                  ]}
+                  field={field}
+                />
+              )}
+            />
+            <span className="form-error">
+              {errors.frecuency && 'Frecuency is required'}
+            </span>
           </div>
 
-          <div className="row form-group">
-            <div className="col-sm-12">
-              Until Date
-              <input
-                type="date"
-                className="form-control"
-                name="until_date"
-                placeholder="Until Date"
-                {...register('until_date', { required: true })}
-              />
-              <span className="form-error">
-                {errors.until_date && 'Until Date is required'}
-              </span>
-            </div>
+          <div>
+            <Controller
+              name="remainder_date"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                valueAsDate: true,
+              }}
+              render={({ field }) => (
+                <InputDate
+                  placeholder="Pick reminder date"
+                  label="Reminder date"
+                  field={field}
+                />
+              )}
+            />
+            <span className="form-error">
+              {errors.remainder_date && 'Pick up a date'}
+            </span>
           </div>
-          <hr />
-          <Flex
-            mih={50}
-            gap="md"
-            justify="center"
-            align="center"
-            direction="row"
-            wrap="wrap"
+          <div>
+            <Controller
+              name="until_date"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                valueAsDate: true,
+              }}
+              render={({ field }) => (
+                <InputDate
+                  placeholder="Pick until date"
+                  label="Until date"
+                  field={field}
+                />
+              )}
+            />
+            <span className="form-error">
+              {errors.until_date && 'Pick up a date'}
+            </span>
+          </div>
+        </SimpleGrid>
+        <hr />
+        <Flex
+          mih={50}
+          gap="md"
+          justify="center"
+          align="center"
+          direction="row"
+          wrap="wrap"
+        >
+          <Button type="submit" loading={isLoading}>
+            Save
+          </Button>
+          <Button
+            color="red"
+            onClick={() => {
+              setOpened(false)
+              reset()
+            }}
           >
-            <Button type="submit" loading={isLoading}>
-              Save
-            </Button>
-            <Button onClick={onCancel} color="red">
-              Cancel
-            </Button>
-          </Flex>
-        </form>
-      </Modal>
+            Cancel
+          </Button>
+        </Flex>
+      </form>
+    </Modal>
   )
 }

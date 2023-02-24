@@ -1,14 +1,15 @@
-import { useEffect, useState, useContext } from 'react'
+import { useContext } from 'react'
 import { Table, Button, LoadingOverlay, Flex } from '@mantine/core'
 import { Edit, Trash } from 'tabler-icons-react'
 
 import { UsersContext } from '../../context/UsersContext'
-import '../../style.css'
+//import '../../style.css'
 
 export default function TableCategory({data, isLoading, onEdit, onDel}) {
   const cols = [
     { header: 'Description', field: 'description', type: 'text' },
     { header: 'Type', field: 'type', type: 'text' },
+    { header: 'User', field: 'name_user', type: 'text' },
     { header: '', field: '', type: '' },
   ]
   
@@ -19,11 +20,11 @@ export default function TableCategory({data, isLoading, onEdit, onDel}) {
       <tr key={index}>
         <td>{category.description}</td>
         <td>{category.type}</td>
+        <td>{category.name_user}</td>
         <td>
           {currentUser &&
-            ((currentUser.type === 'delegate' &&
-              currentUser.id === category.id_user) ||
-              currentUser.type === 'admin') && (
+            ((category.id_user > 0) && ((currentUser.type === 'delegate' && currentUser.id === category.id_user) ||
+              currentUser.type === 'admin')) && (
               <Flex
                 mih={50}
                 gap="xs"
@@ -54,7 +55,7 @@ export default function TableCategory({data, isLoading, onEdit, onDel}) {
   })
 
   const columns = cols.map((column, index) => {
-    return <th key={index}>{column.header}</th>
+    return <th key={column.field}>{column.header}</th>
   })
 
   return (
@@ -64,7 +65,6 @@ export default function TableCategory({data, isLoading, onEdit, onDel}) {
         <h6 className="m-0 font-weight-bold text-primary">Category</h6>
       </div>
       <div className="card-body">
-        <div className="table-responsive">
           <LoadingOverlay
             visible={isLoading}
             overlayBlur={2}
@@ -74,12 +74,10 @@ export default function TableCategory({data, isLoading, onEdit, onDel}) {
             <thead>
               <tr>
                 {columns}
-                <td></td>
               </tr>
             </thead>
             <tbody>{rows}</tbody>
           </Table>
-        </div>
       </div>
     </div>
     </>

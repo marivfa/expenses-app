@@ -1,15 +1,17 @@
 import { useContext, useEffect, useState, useCallback } from 'react'
+import { LoadingOverlay, Button, ScrollArea } from '@mantine/core'
 import { GetAll } from '../../commons/Api'
 import CardList from '../../components/CardList'
 import Card from '../../components/Card'
 import ColumnPlot from '../../components/ColumnPlot'
 import LinePlot from '../../components/LinePlot'
 import PiePlot from '../../components/PiePlot'
+import ModalStep from '../../components/ModalStep'
 
 import { UsersContext } from '../../context/UsersContext'
-
-import { LoadingOverlay, Button, ScrollArea } from '@mantine/core'
 import '../../style.css'
+
+
 export default function MainExpenses() {
   const [data, setData] = useState([])
   const [line, setLine] = useState([])
@@ -17,6 +19,7 @@ export default function MainExpenses() {
   const [pie, setPie] = useState([])
   const [reminders, setReminders] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [opened, setOpened] = useState(false)
 
   const [currentUser] = useContext(UsersContext)
 
@@ -30,7 +33,12 @@ export default function MainExpenses() {
         GetAll(`dashboard/by_type`)
       ])
 
-      if (resume) setData(resume)
+      if (resume){
+        setData(resume)
+        if(resume.count_expenses === 0){
+          setOpened(true)
+        }
+      } 
       if (line.status) setLine(line.data)
       if (column.status) setColumn(column.data)
       if (pie.status) setPie(pie.data)
@@ -182,6 +190,7 @@ export default function MainExpenses() {
           </div>
         </div>
       </div>
+      {data.count_expenses === 0 && (<ModalStep opened={opened} setOpened={setOpened}/>)}
     </div>
   )
 }

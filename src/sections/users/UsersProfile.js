@@ -248,7 +248,7 @@ export default function UsersProfile() {
                     className="small"
                     href="/"
                     role="button"
-                    onClick={() => setOpened(true)}
+                    onClick={(event) => {event.preventDefault(); setOpened(true)}}
                   >
                     Change Password
                   </a>
