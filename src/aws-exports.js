@@ -24,4 +24,9 @@ export default Amplify.configure({
     // OPTIONAL - Manually set the authentication flow type. Default is 'USER_SRP_AUTH'
     authenticationFlowType: 'USER_PASSWORD_AUTH',
   },
+  Storage: { 
+    bucket: 'expenses-app-bucket',
+    region: 'us-east-1',
+    identityPoolId: 'us-east-1:c2762246-5930-4e3b-b770-d1a197eb2141'
+   }
 })

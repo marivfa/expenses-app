@@ -1,36 +1,24 @@
-import React, { useEffect, useState } from 'react'
 import { Line } from '@ant-design/plots'
-import { GetAll } from '../commons/Api'
 
-export default function LinePlot() {
-  const [data, setData] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    asyncFetch()
-  }, [])
-
-  const asyncFetch = () => {
-    setIsLoading(true)
-    GetAll(`dashboard/by_month`).then(
-      res => {
-        setData(res)
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-      }
-    )
-  }
-
+export default function LinePlot({ data, currency }) {
   const config = {
     data,
     padding: 'auto',
-    xField: 'Date',
+    xField: 'date',
     yField: 'amount',
     xAxis: {
       tickCount: 5,
     },
+    meta: {
+      date: {
+        alias: 'Date',
+      },
+      amount: {
+        alias: `Amount ${currency}`,
+      },
+    },
+    colorField: 'type',
+    color: ['#1864AB', '#1971C2', '#1C7ED6','#228BE6','#339AF0','#4DABF7','#74C0FC','#A5D8FF'],
   }
 
   return <Line {...config} />
