@@ -1,25 +1,37 @@
-import { useContext} from 'react'
+import { useContext } from 'react'
 import { Table, Button, LoadingOverlay, Flex } from '@mantine/core'
 import { FileSpreadsheet, Edit, Trash } from 'tabler-icons-react'
 import { InfiniteScroll } from 'react-simple-infinite-scroll'
 import { UsersContext } from '../../context/UsersContext'
- 
+
 import '../../style.css'
 
-export default function TableExpenses({items, isLoading, cursor, loadMore, onDel, onExcel, onEdit, infiniteScrollRef}) {
-  
+export default function TableExpenses({
+  items,
+  isLoading,
+  cursor,
+  loadMore,
+  onDel,
+  onExcel,
+  onEdit,
+  infiniteScrollRef,
+}) {
   const [currentUser] = useContext(UsersContext)
 
   const cols = [
     { header: 'Date Register', field: 'date_register', type: 'text' },
     { header: 'Category', field: 'category', type: 'text' },
-    { header: `Amount (${currentUser && currentUser.currency})`, field: 'amount', type: 'text' },
+    {
+      header: `Amount (${currentUser && currentUser.currency})`,
+      field: 'amount',
+      type: 'text',
+    },
     { header: 'Real Date', field: 'real_date', type: 'text' },
     { header: 'Comment', field: 'comment', type: 'text' },
     { header: 'User', field: 'user', type: 'date' },
     { header: '', field: '', type: '' },
   ]
-  
+
   const rows = items?.map((expenses, index) => {
     return (
       <tr key={index}>
@@ -67,53 +79,72 @@ export default function TableExpenses({items, isLoading, cursor, loadMore, onDel
     return <th key={index}>{column.header}</th>
   })
 
-
   return (
     <div className="card shadow mb-4">
       <div className="card-header py-3">
         <h6 className="m-0 font-weight-bold text-primary">Expenses</h6>
       </div>
       <div className="card-body">
-          <LoadingOverlay
-            visible={isLoading}
-            overlayBlur={2}
-            transitionDuration={500}
-          />
-          <InfiniteScroll
-            throttle={64}
-            threshold={200}
-            isLoading={isLoading}
-            hasMore={!!cursor}
-            onLoadMore={loadMore}
-            ref={infiniteScrollRef}
-          >
+        <LoadingOverlay
+          visible={isLoading}
+          overlayBlur={2}
+          transitionDuration={500}
+        />
+        <InfiniteScroll
+          throttle={100}
+          threshold={200}
+          isLoading={isLoading}
+          hasMore={!!cursor}
+          onLoadMore={loadMore}
+          ref={infiniteScrollRef}
+        >
+          <>
             <Table striped>
               <thead>
-                <tr>
-                  {columns}
-                </tr>
+                <tr>{columns}</tr>
               </thead>
               <tbody>{rows}</tbody>
             </Table>
-          </InfiniteScroll>
-          {items.length === 0 && (
-            <div>
-              <hr />
-              <h4>No data to show</h4>
-            </div>
-          )}
-          {items.length > 0 && (
-            <div>
-              <Button
-                leftIcon={<FileSpreadsheet />}
-                onClick={() => onExcel()}
-                variant="white"
-              >
-                Download
-              </Button>
-            </div>
-          )}
+          </>
+        </InfiniteScroll>
+        {items.length === 0 && (
+          <div>
+            <hr />
+            <h4>No data to show</h4>
+          </div>
+        )}
+        {items.length > 0 && (
+          <div>
+            <Button
+              leftIcon={<FileSpreadsheet />}
+              onClick={() => onExcel()}
+              variant="white"
+            >
+              Download
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )
 }
+
+/*
+<InfiniteScroll
+          throttle={100}
+          threshold={200}
+          isLoading={isLoading}
+          hasMore={!!cursor}
+          onLoadMore={loadMore}
+          ref={infiniteScrollRef}
+        >
+          <>
+            <Table striped>
+              <thead>
+                <tr>{columns}</tr>
+              </thead>
+              <tbody>{rows}</tbody>
+            </Table>
+          </>
+        </InfiniteScroll>
+*/

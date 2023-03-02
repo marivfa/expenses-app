@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Button} from '@mantine/core';
-import { SquarePlus} from 'tabler-icons-react';
+import { Button } from '@mantine/core'
+import { SquarePlus } from 'tabler-icons-react'
 import { toast } from 'react-toastify'
 
 import { GetAll, Delete } from '../../commons/Api'
@@ -23,7 +23,7 @@ export default function MainCategory() {
     setIsLoading(false)
   }
 
-  const onEdit = (id) => {
+  const onEdit = id => {
     setId(id)
     setOpened(true)
   }
@@ -44,17 +44,32 @@ export default function MainCategory() {
     getDataCat()
   }, [])
 
-  
   return (
     <>
       <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-        <Button leftIcon={<SquarePlus/>} onClick={() => {setOpened(true); setId(0)}}>
-            New
+        <Button
+          leftIcon={<SquarePlus />}
+          onClick={() => {
+            setOpened(true)
+            setId(0)
+          }}
+        >
+          New
         </Button>
       </div>
       <hr />
-      <TableCategory data={data} isLoading={isLoading} onEdit={onEdit} onDel={onDel}/>
-      <FormCategory opened={opened} setOpened={setOpened} getDataCat={getDataCat} id={id}/>
+      <TableCategory
+        data={data}
+        isLoading={isLoading}
+        onEdit={onEdit}
+        onDel={onDel}
+      />
+      <FormCategory
+        opened={opened}
+        setOpened={setOpened}
+        getDataCat={getDataCat}
+        id={id}
+      />
     </>
   )
 }

@@ -1,6 +1,6 @@
-import { useEffect, useState , useRef} from 'react'
-import { Button} from '@mantine/core';
-import { SquarePlus} from 'tabler-icons-react';
+import { useEffect, useState, useRef } from 'react'
+import { Button } from '@mantine/core'
+import { SquarePlus } from 'tabler-icons-react'
 import { toast } from 'react-toastify'
 import { Storage } from 'aws-amplify'
 import { Delete, GetAll } from '../../commons/Api'
@@ -15,9 +15,9 @@ export default function MainExpenses() {
   const [isDelete, setIsDelete] = useState(false)
   const [cursor, setCursor] = useState(0)
   const [id, setId] = useState(0)
-  const infiniteScrollRef = useRef(null);
+  const infiniteScrollRef = useRef(null)
 
-  const onEdit = (id) => {
+  const onEdit = id => {
     setId(id)
     setOpened(true)
   }
@@ -33,24 +33,26 @@ export default function MainExpenses() {
     }
   }
 
-  const loadMore = async (newCursor) => {
+  const loadMore = async newCursor => {
     setIsDelete(false)
     setIsLoading(true)
-    
-    const res = await GetAll(`expenses?limit=20&offset=${newCursor !== undefined ? newCursor : cursor}`)
+
+    const res = await GetAll(
+      `expenses?limit=20&offset=${newCursor !== undefined ? newCursor : cursor}`
+    )
     if (res) {
-      if(newCursor !== undefined){
+      if (newCursor !== undefined) {
         setItems(res.items)
-      }else{
+      } else {
         setItems([...items, ...res.items])
       }
-      
+
       setCursor(res.offset + 10)
     }
     setIsLoading(false)
   }
 
-  const getFileExcel = async (url) => {
+  const getFileExcel = async url => {
     setIsLoading(true)
     try {
       const res = await Storage.get(`${url}`, {
@@ -58,14 +60,14 @@ export default function MainExpenses() {
         download: true,
       })
       if (res) {
-        const blob = new Blob([res.Body], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
+        const blob = new Blob([res.Body], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.target = '_blank'
         link.href = url
-        link.download = 'data.csv';
+        link.download = 'data.csv'
         link.click()
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(url)
       }
     } catch (error) {
       console.log('Error uploading file: ', error)
@@ -77,7 +79,6 @@ export default function MainExpenses() {
     const res = await GetAll(`expenses/xls`)
     if (res) {
       getFileExcel(res.url)
-      
     } else {
       toast.error(`${res.error} `)
     }
@@ -85,7 +86,7 @@ export default function MainExpenses() {
 
   useEffect(() => {
     loadMore()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDelete])
 
   /*useEffect(() => {
@@ -93,27 +94,44 @@ export default function MainExpenses() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])*/
 
-
   useEffect(() => {
-    //if (infiniteScrollRef.current) {
-      // Call the reset method of the InfiniteScroll component when the component unmounts
-      //infiniteScrollRef.current.reset();
-    //}
-    return () => {
-      infiniteScrollRef.current = null;
+    if (infiniteScrollRef.current) {
+      return () => {
+        infiniteScrollRef.current = null
+      }
     }
-  }, []);
+  }, [])
 
   return (
     <>
       <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-        <Button leftIcon={<SquarePlus/>} onClick={() => {setOpened(true); setId(0)}}>
-            New
+        <Button
+          leftIcon={<SquarePlus />}
+          onClick={() => {
+            setOpened(true)
+            setId(0)
+          }}
+        >
+          New
         </Button>
       </div>
       <hr />
-      <TableExpenses items={items} isLoading={isLoading} cursor={cursor} loadMore={loadMore} onDel={onDel} onExcel={onExcel} onEdit={onEdit} infiniteScrollRef={infiniteScrollRef}/>
-      <FormExpenses opened={opened} setOpened={setOpened} loadMore={loadMore} id={id}/>
+      <TableExpenses
+        items={items}
+        isLoading={isLoading}
+        cursor={cursor}
+        loadMore={loadMore}
+        onDel={onDel}
+        onExcel={onExcel}
+        onEdit={onEdit}
+        infiniteScrollRef={infiniteScrollRef}
+      />
+      <FormExpenses
+        opened={opened}
+        setOpened={setOpened}
+        loadMore={loadMore}
+        id={id}
+      />
     </>
   )
 }

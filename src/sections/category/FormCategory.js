@@ -3,7 +3,7 @@ import { toast } from 'react-toastify'
 import { Button, Flex, Modal, SimpleGrid } from '@mantine/core'
 import { useForm, Controller } from 'react-hook-form'
 import { GetAll, Save } from '../../commons/Api'
-import { InputText, InputSelect } from '../../components/Inputs'
+import { InputText, InputSelect, InputNumber } from '../../components/Inputs'
 import '../../style.css'
 
 export default function FormCategory({ opened, setOpened, getDataCat, id }) {
@@ -19,6 +19,7 @@ export default function FormCategory({ opened, setOpened, getDataCat, id }) {
     defaultValues: {
       description: '',
       type: '',
+      budget: 0,
     },
   })
 
@@ -118,6 +119,15 @@ export default function FormCategory({ opened, setOpened, getDataCat, id }) {
             <span className="form-error">
               {errors.description && 'Description is required'}
             </span>
+          </div>
+          <div>
+            <Controller
+              name="budget"
+              control={control}
+              render={({ field }) => (
+                <InputNumber label="Budget(Monthly)" field={field} />
+              )}
+            />
           </div>
         </SimpleGrid>
 

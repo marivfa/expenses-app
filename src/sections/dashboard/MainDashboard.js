@@ -11,7 +11,6 @@ import ModalStep from '../../components/ModalStep'
 import { UsersContext } from '../../context/UsersContext'
 import '../../style.css'
 
-
 export default function MainExpenses() {
   const [data, setData] = useState([])
   const [line, setLine] = useState([])
@@ -30,32 +29,29 @@ export default function MainExpenses() {
         GetAll(`dashboard/resumen`),
         GetAll(`dashboard/by_month`),
         GetAll(`dashboard/by_category`),
-        GetAll(`dashboard/by_type`)
+        GetAll(`dashboard/by_type`),
       ])
 
-      if (resume){
+      if (resume) {
         setData(resume)
-        if(resume.count_expenses === 0){
+        if (resume.count_expenses === 0) {
           setOpened(true)
         }
-      } 
+      }
       if (line.status) setLine(line.data)
       if (column.status) setColumn(column.data)
       if (pie.status) setPie(pie.data)
-
     } catch (err) {
       console.error(err)
     }
     setIsLoading(false)
   }, [])
 
-
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-
-  const getReminders = async (option) => {
+  const getReminders = async option => {
     setIsLoading(true)
     const res = await GetAll(`dashboard/reminder/?option=${option}`)
     if (res) {
@@ -67,7 +63,6 @@ export default function MainExpenses() {
   useEffect(() => {
     getReminders('daily')
   }, [])
-
 
   return (
     <div>
@@ -118,7 +113,10 @@ export default function MainExpenses() {
                   overlayBlur={2}
                   transitionDuration={500}
                 />
-                <LinePlot data={line} currency={currentUser ? currentUser.currency : '$'}/>
+                <LinePlot
+                  data={line}
+                  currency={currentUser ? currentUser.currency : '$'}
+                />
               </div>
             </div>
           </div>
@@ -131,9 +129,21 @@ export default function MainExpenses() {
             </div>
             <div className="card-body">
               <Button.Group>
-                <Button variant="default" onClick={() => getReminders('daily')}>Day</Button>
-                <Button variant="default" onClick={() => getReminders('weekly')}>Week</Button>
-                <Button variant="default" onClick={() => getReminders('monthly')}>Month</Button>
+                <Button variant="default" onClick={() => getReminders('daily')}>
+                  Day
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={() => getReminders('weekly')}
+                >
+                  Week
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={() => getReminders('monthly')}
+                >
+                  Month
+                </Button>
               </Button.Group>
               <hr></hr>
               <ScrollArea style={{ height: 250 }}>
@@ -164,7 +174,10 @@ export default function MainExpenses() {
                   overlayBlur={2}
                   transitionDuration={500}
                 />
-                <ColumnPlot data={column} currency={currentUser ? currentUser.currency : '$'}/>
+                <ColumnPlot
+                  data={column}
+                  currency={currentUser ? currentUser.currency : '$'}
+                />
               </div>
             </div>
           </div>
@@ -184,13 +197,18 @@ export default function MainExpenses() {
                   overlayBlur={2}
                   transitionDuration={500}
                 />
-                <PiePlot data={pie} currency={currentUser ? currentUser.currency : '$'}/>
+                <PiePlot
+                  data={pie}
+                  currency={currentUser ? currentUser.currency : '$'}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
-      {data.count_expenses === 0 && (<ModalStep opened={opened} setOpened={setOpened}/>)}
+      {data.count_expenses === 0 && (
+        <ModalStep opened={opened} setOpened={setOpened} />
+      )}
     </div>
   )
 }
