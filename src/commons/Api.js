@@ -18,7 +18,7 @@ const requestApi = async (path, method, params) => {
   }
 }
 
-const SaveUser = async (path, method, params, token) => {
+export const SaveUser = async (path, method, params, token) => {
   try {
     const data = await fetch(`${BASE_URL}${path}`, {
       method: method,
@@ -34,13 +34,6 @@ const SaveUser = async (path, method, params, token) => {
   }
 }
 
-const GetAll = (url, data) => requestApi(url, 'GET', data)
-const Save = (url, method, data) => requestApi(url, method, data)
-const Delete = (url, data) => requestApi(url, 'DELETE', data)
-
-module.exports = {
-  GetAll,
-  SaveUser,
-  Save,
-  Delete,
-}
+export const GetAll = (url, data) => requestApi(url, 'GET', data)
+export const Save = (url, method, data) => requestApi(url, method, data)
+export const Delete = (url, data) => requestApi(url, 'DELETE', data)

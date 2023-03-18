@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import ListGroup from 'react-bootstrap/ListGroup'
-import { Card, Text, Group, Space, Switch } from '@mantine/core'
+import { Card, Group, Space, Switch, Text } from '@mantine/core'
 import { Save } from '../commons/Api'
 
 export default function CardList({ data }) {
