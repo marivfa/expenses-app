@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8000/'
+const BASE_URL = 'http://18.204.20.100:8000/'
 
 const auth = JSON.parse(localStorage.getItem('token'))
 
