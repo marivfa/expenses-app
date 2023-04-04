@@ -1,44 +1,8 @@
-import React, { useEffect, useState } from 'react'
 import { Column } from '@ant-design/plots'
-import { GetAll } from '../commons/Api'
 
-export default function ColumnPlot() {
-  const [data, setData] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    asyncFetch()
-  }, [])
-
-  const asyncFetch = () => {
-    setIsLoading(true)
-    GetAll(`dashboard/by_category`).then(
-      res => {
-        let arrTMP = []
-        Object.entries(res).forEach(([key, value]) => {
-          let obj = {
-            category: key,
-            amount: value,
-          }
-          arrTMP.push(obj)
-        })
-
-        setData(arrTMP)
-
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-      }
-    )
-  }
-
+export default function ColumnPlot({ data, currency }) {
   const config = {
     data,
-    title: {
-      visible: true,
-      text: 'Your Stats',
-    },
     xField: 'category',
     yField: 'amount',
     xAxis: {
@@ -47,14 +11,21 @@ export default function ColumnPlot() {
         autoRotate: false,
       },
     },
+    seriesField: 'category',
     meta: {
       category: {
         alias: 'Category',
       },
       amount: {
-        alias: 'Amount',
+        alias: `Amount ${currency}`,
       },
     },
+    colorField: 'type',
+    color: ['#1864AB', '#1971C2', '#1C7ED6','#228BE6','#339AF0','#4DABF7','#74C0FC','#A5D8FF'],
+    legend: {
+      layout: 'horizontal',
+      position: 'top'
+    }
   }
 
   return <Column {...config} />

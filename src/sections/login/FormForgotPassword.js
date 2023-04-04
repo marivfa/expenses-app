@@ -1,60 +1,111 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { Auth } from 'aws-amplify'
+import { Button, Flex } from '@mantine/core'
+import FormCode from './FormCode'
+
 import '../../style.css'
 
-import { useForm } from 'react-hook-form'
-
-export default function FormForgotPassword() {
-  const [login, setLogin] = useState(true)
-
+export default function FormForgotPassword({ onClickCreate, onClickLogin }) {
+  const [forgotPass, setForgotPass] = useState(true)
+  const [userdata, setUserdata] = useState([])
+  const [error, setError] = useState()
+  const [isLoading, setLoading] = useState(false)
   const {
     register,
     formState: { errors },
     handleSubmit,
-    setValue,
   } = useForm()
 
-  const onSubmit = data => {}
+  const onSubmit = async data => {
+    setError()
+    setLoading(true)
+    try {
+      await Auth.forgotPassword(data.username)
+      setForgotPass(false)
+      setUserdata({ username: data.username })
+    } catch (error) {
+      setError(error.message)
+    }
+    setLoading(false)
+  }
 
   return (
     <div>
-      <div className="card shadow mb-4">
-        <div className="card-header py-3">
-          <h6 className="m-0 font-weight-bold text-primary">Forgot Password</h6>
-        </div>
-        <div className="card-body">
-          <form className="user" onSubmit={handleSubmit(onSubmit)}>
-            <div className="form-group">
-              <input
-                type="text"
-                className="form-control"
-                name="Username"
-                placeholder="Username"
-                {...register('username', { required: true })}
-              />
-              <span className="form-error">
-                {errors.username && 'Username is required'}
-              </span>
-            </div>
+      {forgotPass ? (
+        <div className="card shadow mb-4">
+          <div className="card-header py-3">
+            <h6 className="m-0 font-weight-bold text-primary">
+              Forgot Password
+            </h6>
+          </div>
+          <div className="card-body">
+            <h6 className="m-0 font-weight-bold text-danger">{error}</h6>
             <hr />
-            <div className="offset-sm-4 col-sm-4">
-              <button className="btn btn-primary btn-user btn-block">
-                Reset Password
-              </button>
-            </div>
-            <div className="text-center">
-              <a className="small" href="register.html">
-                Create an Account!
-              </a>
-            </div>
-            <div className="text-center">
-              <a className="small" href="forgot-password.html">
-                Already have an account? Login!
-              </a>
-            </div>
-          </form>
+            <form className="user" onSubmit={handleSubmit(onSubmit)}>
+              <div className="form-group">
+                <input
+                  type="email"
+                  className="form-control"
+                  name="Username"
+                  placeholder="Username"
+                  {...register('username', {
+                    required: true,
+                    pattern: {
+                      value: /\S+@\S+\.\S+/,
+                      message: 'Entered value does not match email format',
+                    },
+                  })}
+                />
+                <span className="form-error">
+                  {errors.username && 'Username is required'}
+                </span>
+              </div>
+              <hr />
+
+              <Flex
+                mih={50}
+                gap="md"
+                justify="center"
+                align="center"
+                direction="row"
+                wrap="wrap"
+              >
+                <Button type="submit" loading={isLoading}>
+                  Reset Password
+                </Button>
+              </Flex>
+
+              <div className="text-center">
+                <a
+                  className="small"
+                  href="/"
+                  role="button"
+                  onClick={onClickCreate}
+                >
+                  Create an Account!
+                </a>
+              </div>
+              <div className="text-center">
+                <a
+                  className="small"
+                  href="/"
+                  role="button"
+                  onClick={onClickLogin}
+                >
+                  Already have an account? Login!
+                </a>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      ) : (
+        <FormCode
+          userdata={userdata}
+          onClickLogin={onClickLogin}
+          type="forgotpass"
+        />
+      )}
     </div>
   )
 }

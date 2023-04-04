@@ -1,55 +1,79 @@
-import React, { useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useCallback } from 'react'
+import { LoadingOverlay, Button, ScrollArea } from '@mantine/core'
 import { GetAll } from '../../commons/Api'
 import CardList from '../../components/CardList'
 import Card from '../../components/Card'
 import ColumnPlot from '../../components/ColumnPlot'
 import LinePlot from '../../components/LinePlot'
 import PiePlot from '../../components/PiePlot'
+import ModalStep from '../../components/ModalStep'
+
+import { UsersContext } from '../../context/UsersContext'
 import '../../style.css'
 
 export default function MainExpenses() {
   const [data, setData] = useState([])
+  const [line, setLine] = useState([])
+  const [column, setColumn] = useState([])
+  const [pie, setPie] = useState([])
+  const [reminders, setReminders] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [opened, setOpened] = useState(false)
 
-  useEffect(() => {
-    getResumen()
+  const [currentUser] = useContext(UsersContext)
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const [resume, line, column, pie] = await Promise.all([
+        GetAll(`dashboard/resumen`),
+        GetAll(`dashboard/by_month`),
+        GetAll(`dashboard/by_category`),
+        GetAll(`dashboard/by_type`),
+      ])
+
+      if (resume) {
+        setData(resume)
+        if (resume.count_expenses === 0) {
+          setOpened(true)
+        }
+      }
+      if (line.status) setLine(line.data)
+      if (column.status) setColumn(column.data)
+      if (pie.status) setPie(pie.data)
+    } catch (err) {
+      console.error(err)
+    }
+    setIsLoading(false)
   }, [])
 
-  const getResumen = () => {
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  const getReminders = async option => {
     setIsLoading(true)
-    GetAll(`dashboard/resumen`).then(
-      res => {
-        setData(res)
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-      }
-    )
+    const res = await GetAll(`dashboard/reminder/?option=${option}`)
+    if (res) {
+      setReminders(res.data)
+    }
+    setIsLoading(false)
   }
 
-  const getRemainders = () => {
-    setIsLoading(true)
-    GetAll(`dashboard/resumen`).then(
-      res => {
-        setData(res)
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-      }
-    )
-  }
+  useEffect(() => {
+    getReminders('daily')
+  }, [])
 
   return (
     <div>
       <div className="row">
         <div className="col-xl-4 col-md-6 mb-4">
           <Card
-            title={'Expenses Monthly'}
+            title={'Total expenses current month'}
             value={data.expenses_monthly}
             leftColor={'border-left-warning'}
             textColor={'text-warning'}
+            currency={currentUser ? currentUser.currency : '$'}
           />
         </div>
 
@@ -59,15 +83,17 @@ export default function MainExpenses() {
             value={data.avg_monthly}
             leftColor={'border-left-primary'}
             textColor={'text-primary'}
+            currency={currentUser ? currentUser.currency : '$'}
           />
         </div>
 
         <div className="col-xl-4 col-md-6 mb-4">
           <Card
-            title={'Expenses (Annual)'}
+            title={'Total expenses (Annual)'}
             value={data.total_annual}
             leftColor={'border-left-success'}
             textColor={'text-success'}
+            currency={currentUser ? currentUser.currency : '$'}
           />
         </div>
       </div>
@@ -82,7 +108,15 @@ export default function MainExpenses() {
             </div>
             <div className="card-body">
               <div className="chart-area">
-                <LinePlot />
+                <LoadingOverlay
+                  visible={isLoading}
+                  overlayBlur={2}
+                  transitionDuration={500}
+                />
+                <LinePlot
+                  data={line}
+                  currency={currentUser ? currentUser.currency : '$'}
+                />
               </div>
             </div>
           </div>
@@ -91,26 +125,35 @@ export default function MainExpenses() {
         <div className="col-xl-4 col-lg-7">
           <div className="card shadow mb-4">
             <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-              <h6 className="m-0 font-weight-bold text-primary">Remainders</h6>
+              <h6 className="m-0 font-weight-bold text-primary">Reminders</h6>
             </div>
             <div className="card-body">
-              <div
-                className="btn-group btn-group-sm"
-                role="group"
-                aria-label="Busqueda"
-              >
-                <button type="button" className="btn btn-light">
+              <Button.Group>
+                <Button variant="default" onClick={() => getReminders('daily')}>
                   Day
-                </button>
-                <button type="button" className="btn btn-light">
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={() => getReminders('weekly')}
+                >
                   Week
-                </button>
-                <button type="button" className="btn btn-light">
+                </Button>
+                <Button
+                  variant="default"
+                  onClick={() => getReminders('monthly')}
+                >
                   Month
-                </button>
-              </div>
+                </Button>
+              </Button.Group>
               <hr></hr>
-              <CardList />
+              <ScrollArea style={{ height: 250 }}>
+                <LoadingOverlay
+                  visible={isLoading}
+                  overlayBlur={2}
+                  transitionDuration={500}
+                />
+                <CardList data={reminders} />
+              </ScrollArea>
             </div>
           </div>
         </div>
@@ -126,7 +169,15 @@ export default function MainExpenses() {
             </div>
             <div className="card-body">
               <div className="chart-area">
-                <ColumnPlot />
+                <LoadingOverlay
+                  visible={isLoading}
+                  overlayBlur={2}
+                  transitionDuration={500}
+                />
+                <ColumnPlot
+                  data={column}
+                  currency={currentUser ? currentUser.currency : '$'}
+                />
               </div>
             </div>
           </div>
@@ -141,12 +192,23 @@ export default function MainExpenses() {
             </div>
             <div className="card-body">
               <div className="chart-area">
-                <PiePlot />
+                <LoadingOverlay
+                  visible={isLoading}
+                  overlayBlur={2}
+                  transitionDuration={500}
+                />
+                <PiePlot
+                  data={pie}
+                  currency={currentUser ? currentUser.currency : '$'}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
+      {data.count_expenses === 0 && (
+        <ModalStep opened={opened} setOpened={setOpened} />
+      )}
     </div>
   )
 }

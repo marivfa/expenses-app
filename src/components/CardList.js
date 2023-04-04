@@ -1,60 +1,93 @@
-import React, { useEffect, useState } from 'react'
-import Badge from 'react-bootstrap/Badge'
+import { useState, useEffect } from 'react'
+import { toast } from 'react-toastify'
 import ListGroup from 'react-bootstrap/ListGroup'
-import { GetAll } from '../commons/Api'
+import { Card, Group, Space, Switch, Text } from '@mantine/core'
+import { Save } from '../commons/Api'
 
-export default function CardList() {
-  const [data, setData] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+export default function CardList({ data }) {
+  /*const [items, setItems] = useState(
+    data.map((item) => ({
+      ...item,
+      checked: (item.status === 'pending' ? false : true) || false,
+    }))
+  );*/
+  const [items, setItems] = useState(null)
 
-  useEffect(() => {
-    asyncFetch()
-  }, [])
+  const saveChecked = async (e, id) => {
+    if (e.currentTarget) {
+      const isChecked = e.currentTarget.checked
+      setItems(prevItems =>
+        prevItems.map(item =>
+          item.detail_id === id ? { ...item, checked: isChecked } : item
+        )
+      )
+    }
 
-  const asyncFetch = () => {
-    setIsLoading(true)
-    GetAll(`dashboard/by_category`).then(
-      res => {
-        let arrTMP = []
-        Object.entries(res).forEach(([key, value]) => {
-          let obj = {
-            category: key,
-            amount: value,
-          }
-          arrTMP.push(obj)
-        })
-
-        setData(arrTMP)
-
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-      }
-    )
+    const URL = `remainders/detail/${id}`
+    const detail = {
+      status: e.currentTarget.checked ? 'check' : 'pending',
+    }
+    const res = await Save(URL, 'PUT', detail)
+    if (res) {
+      toast.success('Submitted successfully')
+    } else {
+      toast.error(`Submit error ${res.error} `)
+    }
   }
 
-  const listItem = data?.map((data, index) => {
+  useEffect(() => {
+    // Load items from props
+    setItems(
+      data.map(item => ({
+        ...item,
+        checked: (item.status === 'pending' ? false : true) || false,
+      }))
+    )
+  }, [data])
+
+  useEffect(() => {
+    return () => {
+      // Cancel all asynchronous tasks and subscriptions here
+    }
+  }, [])
+
+  const listItem = items?.map((item, index) => {
     return (
-      <ListGroup.Item
-        key={index}
-        as="li"
-        className="d-flex justify-content-between align-items-start"
-      >
-        <div className="ms-2 me-auto">
-          <div className="fw-bold">Description</div>
-          Date
-        </div>
-        <Badge bg="primary" pill>
-          State
-        </Badge>
-      </ListGroup.Item>
+      <div key={item.detail_id}>
+        <Card p="xs" radius="md" withBorder>
+          <Group position="apart">
+            <Text weight={500}>{item.description}</Text>
+            <Switch
+              color="green"
+              size="md"
+              onLabel="check"
+              offLabel="pending"
+              onChange={event => saveChecked(event, item.detail_id)}
+              checked={item.checked}
+            />
+          </Group>
+          <Text size="xs" color="dimmed" ta="left">
+            {item.date_time}
+          </Text>
+        </Card>
+        <Space h="xs" />
+      </div>
     )
   })
 
   return (
     <div>
-      <ListGroup as="ol">{listItem}</ListGroup>
+      {data.length > 0 ? (
+        <ListGroup as="ol">{listItem}</ListGroup>
+      ) : (
+        <Text ta="center">No reminders to show</Text>
+      )}
     </div>
   )
 }
+
+/*
+<Badge color={`${data.status === 'pending' ? 'pink' : 'green'}`} variant="light">
+            {data.status}
+          </Badge>
+          */

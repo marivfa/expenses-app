@@ -1,42 +1,12 @@
-import React, { useEffect, useState } from 'react'
 import { Pie } from '@ant-design/plots'
-import { GetAll } from '../commons/Api'
 
-export default function PiePlot() {
-  const [data, setData] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    asyncFetch()
-  }, [])
-
-  const asyncFetch = () => {
-    setIsLoading(true)
-    GetAll(`dashboard/by_type`).then(
-      res => {
-        let arrTMP = []
-        Object.entries(res).forEach(([key, value]) => {
-          let obj = {
-            type: key,
-            value: value,
-          }
-          arrTMP.push(obj)
-        })
-        setData(arrTMP)
-
-        setIsLoading(false)
-      },
-      error => {
-        setIsLoading(false)
-      }
-    )
-  }
-
+export default function PiePlot({ data, currency }) {
   const config = {
     appendPadding: 10,
     data,
     angleField: 'value',
     colorField: 'type',
+    color: ['#228be6', '#FAB005', '#000000'],
     radius: 0.75,
     label: {
       type: 'spider',

@@ -1,23 +1,9 @@
-const BASE_URL = 'http://localhost:8000/'
+//const BASE_URL = 'http://localhost:8000/'
+const BASE_URL = 'https://18.204.20.100/'
 
 const auth = JSON.parse(localStorage.getItem('token'))
 
-const GetAll = async (path, pagination) => {
-  try {
-    const data = await fetch(pagination ? pagination : `${BASE_URL}${path}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${auth.token}`,
-      },
-    })
-    return data.json()
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-const Save = async (path, method, params) => {
+const requestApi = async (path, method, params) => {
   try {
     const data = await fetch(`${BASE_URL}${path}`, {
       method: method,
@@ -33,14 +19,15 @@ const Save = async (path, method, params) => {
   }
 }
 
-const Delete = async path => {
+export const SaveUser = async (path, method, params, token) => {
   try {
     const data = await fetch(`${BASE_URL}${path}`, {
-      method: 'DELETE',
+      method: method,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${auth.token}`,
+        Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify(params),
     })
     return data.json()
   } catch (error) {
@@ -48,8 +35,6 @@ const Delete = async path => {
   }
 }
 
-module.exports = {
-  GetAll,
-  Save,
-  Delete,
-}
+export const GetAll = (url, data) => requestApi(url, 'GET', data)
+export const Save = (url, method, data) => requestApi(url, method, data)
+export const Delete = (url, data) => requestApi(url, 'DELETE', data)

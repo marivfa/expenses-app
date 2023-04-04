@@ -1,32 +1,45 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import '../../style.css'
-import { Save } from '../../commons/Api'
-
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
 import { Auth } from 'aws-amplify'
+import { Button, Flex } from '@mantine/core'
+import { SaveUser } from '../../commons/Api'
+import '../../style.css'
 
-export default function FormCode({ userdata }) {
-  const [login, setLogin] = useState(true)
-
+export default function FormCode({ userdata, onClickLogin, type }) {
+  const [error, setError] = useState()
+  const [msj, setMsj] = useState()
+  const [isLoading, setLoading] = useState(false)
   const {
     register,
     formState: { errors },
     handleSubmit,
-    setValue,
   } = useForm()
 
   const onSubmit = async data => {
+    setLoading(true)
     try {
-      await Auth.confirmSignUp(userdata.username, data.code)
-      onCreateUser()
+      if (type === 'create') {
+        await Auth.confirmSignUp(userdata.username, data.code)
+        const user = await Auth.currentSession()
+        await onCreateUser(user.idToken.jwtToken)
+      } else if (type === 'forgotpass') {
+        await Auth.forgotPasswordSubmit(
+          userdata.username,
+          data.code,
+          data.password
+        )
+        setMsj('Your password has been changed successfully')
+        setTimeout(function () {
+          window.location.reload()
+        }, 1000)
+      }
     } catch (error) {
-      console.log('error confirming sign up', error)
+      setError(error.message)
     }
+    setLoading(false)
   }
 
-  const onCreateUser = () => {
+  const onCreateUser = async token => {
     let data = {
       name: userdata.name,
       email: userdata.username,
@@ -34,25 +47,13 @@ export default function FormCode({ userdata }) {
       type: 'admin',
       master_id: 0,
     }
-    Save('users', 'POST', data).then(res => {
-      if (res) {
-        toast.success('Submitted successfully')
-        setTimeout(function () {
-          window.location.reload()
-        }, 1000)
-      } else {
-        //toast.error(`Form submit error ${res.error} `)
-      }
-    })
-  }
-
-  const onClickResend = async data => {
-    /*try {
-      await Auth.resendSignUp(userdata.username)
-      console.log('code resent successfully')
-    } catch (err) {
-      console.log('error resending code: ', err)
-    }*/
+    const res = await SaveUser('users', 'POST', data, token)
+    if (res) {
+      setMsj('User has been created successfully')
+      setTimeout(function () {
+        window.location.reload()
+      }, 1000)
+    }
   }
 
   return (
@@ -64,6 +65,18 @@ export default function FormCode({ userdata }) {
           </h6>
         </div>
         <div className="card-body">
+          <h6
+            className={`m-0 font-weight-bold ${error && 'text-danger'} ${
+              msj && 'text-success'
+            }`}
+          >
+            {error}
+            {msj}
+          </h6>
+          <hr />
+          <span>
+            A confirmation code has already been sent to your e-mail address.
+          </span>
           <form className="user" onSubmit={handleSubmit(onSubmit)}>
             <div className="form-group">
               <input
@@ -77,24 +90,49 @@ export default function FormCode({ userdata }) {
                 {errors.code && 'Code is required'}
               </span>
             </div>
+
+            {type === 'forgotpass' && (
+              <div className="form-group">
+                <input
+                  type="password"
+                  className="form-control"
+                  name="Password"
+                  placeholder="Password"
+                  {...register('password', {
+                    required: true,
+                    minLength: {
+                      value: 8,
+                      message: 'min length is 8',
+                    },
+                  })}
+                />
+                <span className="form-error">
+                  {errors.password && 'Password is required'}
+                </span>
+              </div>
+            )}
+
             <hr />
-            <div className="offset-sm-4 col-sm-4">
-              <button className="btn btn-primary btn-user btn-block">
+            <Flex
+              mih={50}
+              gap="md"
+              justify="center"
+              align="center"
+              direction="row"
+              wrap="wrap"
+            >
+              <Button type="submit" loading={isLoading}>
                 Send code
-              </button>
-            </div>
+              </Button>
+            </Flex>
+
             <div className="text-center">
               <a
                 className="small"
-                href="#"
+                href="/"
                 role="button"
-                onClick={onClickResend}
+                onClick={onClickLogin}
               >
-                Resend Code
-              </a>
-            </div>
-            <div className="text-center">
-              <a className="small" href="forgot-password.html">
                 Already have an account? Login!
               </a>
             </div>

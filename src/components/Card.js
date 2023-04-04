@@ -1,7 +1,7 @@
 import React from 'react'
 import CurrencyFormat from 'react-currency-format'
 
-export default function Card({ title, value, leftColor, textColor }) {
+export default function Card({ title, value, leftColor, textColor, currency }) {
   return (
     <div>
       <div className={`card shadow h-100 py-2 ${leftColor}`}>
@@ -18,7 +18,7 @@ export default function Card({ title, value, leftColor, textColor }) {
                   value={value}
                   displayType={'text'}
                   thousandSeparator={true}
-                  prefix={'$'}
+                  prefix={`${currency}`}
                 />
               </div>
             </div>

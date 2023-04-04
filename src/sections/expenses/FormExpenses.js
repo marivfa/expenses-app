@@ -1,50 +1,50 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import Autocomplete from '../../components/Autocomplete'
-import '../../style.css'
-
-import { useForm } from 'react-hook-form'
+import { Button, Flex, Modal, SimpleGrid } from '@mantine/core'
+import { useForm, Controller } from 'react-hook-form'
+import moment from 'moment'
 import { toast } from 'react-toastify'
 import { GetAll, Save } from '../../commons/Api'
 
-export default function FormExpenses() {
-  const { id } = useParams()
-  const isAdd = !id
+import {
+  InputText,
+  InputDate,
+  InputNumber,
+  InputSelect,
+} from '../../components/Inputs'
+
+import '../../style.css'
+
+export default function FormExpenses({ opened, setOpened, loadMore, id }) {
   const {
-    register,
-    formState: { errors },
+    control,
     handleSubmit,
     setValue,
-  } = useForm()
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      id_category: 0,
+      amount: 0,
+      real_date: new Date(),
+      comment: '',
+    },
+  })
 
-  const [categoryName, setCategoryName] = useState('')
   const [category, setCategory] = useState([])
-  const [showForm, setShowForm] = useState(false)
-
-  const navigate = useNavigate()
-
-  const onCancel = () => {
-    navigate('/expenses')
-  }
-
-  const handleChangeForm = id => {
-    setValue('id_category', id, {
-      shouldValidate: true,
-    })
-  }
-
-  const handleCheckClick = () => {
-    setShowForm(!showForm)
-  }
+  const [isLoading, setIsLoading] = useState(false)
 
   //Save Expenses
-  const onSubmit = data => {
-    const method = id ? 'PUT' : 'POST'
-    //delete data.id
-    //delete data.status
+  const onSubmit = async data => {
     data.id_user = 0
+    const values = {
+      ...data,
+      real_date: moment(data.real_date).format('YYYY-MM-DD'), // format the date value to match your backend format
+    }
 
-    if (showForm) {
+    setIsLoading(true)
+    const method = id ? 'PUT' : 'POST'
+
+    /*if (showForm) {
       data.remainders = {
         description: data.description,
         frecuency: data.frecuency,
@@ -54,117 +54,185 @@ export default function FormExpenses() {
       delete data.description
       delete data.frecuency
       delete data.until_date
-    }
+    }*/
 
     const URL = id ? `expenses/${id}` : 'expenses'
-    Save(URL, method, data).then(res => {
-      if (res) {
-        toast.success('Submitted successfully')
-        onCancel()
-      } else {
-        toast.error(`Form submit error ${res.error} `)
-      }
-    })
+    const res = await Save(URL, method, values)
+    if (res) {
+      toast.success('Submitted successfully')
+      reset()
+      setOpened(false)
+      await loadMore(0)
+    } else {
+      toast.error(`Form submit error ${res.error} `)
+    }
+    setIsLoading(false)
+  }
+
+  const getExpenses = async () => {
+    setIsLoading(true)
+    const res = await GetAll(`expenses/${id}`)
+    if (res) {
+      Object.entries(res).forEach(([key, value]) => {
+        if (key === 'real_date') {
+          const date = moment(value).format('ddd MMM DD YYYY HH:mm:ss')
+          const newDate = new Date(date)
+          setValue(key, newDate)
+        } else {
+          setValue(key, value)
+        }
+      })
+    }
+    setIsLoading(false)
+  }
+
+  const getCategory = async () => {
+    const res = await GetAll('category')
+    if (res) {
+      let arrCategory = []
+      Object.entries(res).forEach(([key, value]) => {
+        let objTmp = {
+          value: value.id,
+          label: value.description,
+          group: value.type,
+        }
+        arrCategory.push(objTmp)
+      })
+      setCategory(arrCategory)
+    }
   }
 
   //Get One Expenses -- Edit
   useEffect(() => {
-    if (!isAdd) {
-      GetAll(`expenses/${id}`).then(res => {
-        if (res) {
-          console.log(res)
-          Object.entries(res).forEach(([key, value]) => {
-            setValue(key, value)
-            if (key === 'category') {
-              setCategoryName(value)
-            }
-          })
-        }
-      })
+    if (id > 0) {
+      getExpenses()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [id])
 
   //Get Category -- Autocomplete
   useEffect(() => {
-    GetAll('category').then(res => {
-      if (res) {
-        setCategory(res)
-      }
-    })
+    getCategory()
   }, [])
 
   return (
-    <div className="card shadow mb-4">
-      <div className="card-header py-3">
-        <h6 className="m-0 font-weight-bold text-primary">
-          {isAdd ? 'Add' : 'Edit'} Expenses
-        </h6>
-      </div>
-      <div className="card-body">
-        <form className="user" onSubmit={handleSubmit(onSubmit)}>
-          <div className="row form-group">
-            <div className="col-sm-6">
-              <span> Select Category</span>
-              <Autocomplete
-                suggestions={category}
-                handleChangeForm={handleChangeForm}
-                categoryName={categoryName}
-              />
-              <span className="form-error">
-                {errors.category_id && 'Category is required'}
-              </span>
-            </div>
-            <div className="col-sm-6"></div>
+    <Modal
+      centered
+      opened={opened}
+      onClose={() => setOpened(false)}
+      withCloseButton={true}
+      title={id === 0 ? 'Add Expenses' : 'Edit Expenses'}
+    >
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <SimpleGrid cols={1} spacing="xs" verticalSpacing="xs">
+          <div>
+            <Controller
+              name="id_category"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                validate: value => value > 0,
+              }}
+              render={({ field }) => (
+                <InputSelect
+                  label="Select Category"
+                  placeholder="Pick one"
+                  data={category}
+                  field={field}
+                />
+              )}
+            />
+            <span className="form-error">
+              {errors.id_category && 'Select a category'}
+            </span>
           </div>
-          <div className="row form-group">
-            <div className="col-sm-6">
-              <input
-                type="text"
-                className="form-control"
-                name="amount"
-                placeholder="Amount"
-                {...register('amount', { required: true })}
-              />
-              <span className="form-error">
-                {errors.amount && 'Amount is required'}
-              </span>
-            </div>
-            <div className="col-sm-6"></div>
+          <div>
+            <Controller
+              name="amount"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                validate: value => value > 0,
+              }}
+              render={({ field }) => (
+                <InputNumber label="Amount" field={field} />
+              )}
+            />
+            <span className="form-error">
+              {errors.amount && 'Amount must to be greater than 0'}
+            </span>
           </div>
+          <div>
+            <Controller
+              name="real_date"
+              control={control}
+              rules={{
+                required: {
+                  value: true,
+                },
+                valueAsDate: true,
+              }}
+              render={({ field }) => (
+                <InputDate
+                  placeholder="Pick real date"
+                  label="Real date"
+                  field={field}
+                />
+              )}
+            />
+            <span className="form-error">
+              {errors.real_date && 'Pick up a date'}
+            </span>
+          </div>
+          <div>
+            <Controller
+              name="comment"
+              control={control}
+              render={({ field }) => (
+                <InputText
+                  label="Comment"
+                  placeholder="Comment"
+                  field={field}
+                />
+              )}
+            />
+          </div>
+        </SimpleGrid>
+        <hr />
+        <Flex
+          mih={50}
+          gap="md"
+          justify="center"
+          align="center"
+          direction="row"
+          wrap="wrap"
+        >
+          <Button type="submit" loading={isLoading}>
+            Save
+          </Button>
+          <Button
+            color="red"
+            onClick={() => {
+              setOpened(false)
+              reset()
+            }}
+          >
+            Cancel
+          </Button>
+        </Flex>
+      </form>
+    </Modal>
+  )
+}
 
-          <div className="row form-group">
-            <div className="col-sm-6">
-              Real Date
-              <input
-                type="date"
-                className="form-control"
-                name="real_date"
-                placeholder="Realdate Date"
-                {...register('real_date', { required: true })}
-              />
-              <span className="form-error">
-                {errors.real_date && 'Real Date is required'}
-              </span>
-            </div>
-          </div>
-
-          <div className="row form-group">
-            <div className="col-sm-6">
-              <input
-                type="text"
-                className="form-control"
-                name="comment"
-                placeholder="Comment"
-                {...register('comment')}
-              />
-            </div>
-            <div className="col-sm-6"></div>
-          </div>
-
-          <div className="row form-group">
-            <div className="col-sm-6">
-              <span>Mark as remainder</span>
+/*
+<div className="row form-group">
+            <div className="col-sm-12">
+              <span>Mark as reminder</span>
               <input
                 className="form-control"
                 name="is_remainder"
@@ -172,7 +240,6 @@ export default function FormExpenses() {
                 onClick={handleCheckClick}
               />
             </div>
-            <div className="col-sm-6"></div>
           </div>
 
           {showForm && (
@@ -228,24 +295,4 @@ export default function FormExpenses() {
             </div>
           )}
 
-          <hr />
-          <div className="row form-group">
-            <div className="offset-sm-4 col-sm-2">
-              <button className="btn btn-primary btn-user btn-block">
-                Save
-              </button>
-            </div>
-            <div className="col-sm-2">
-              <button
-                className="btn btn-danger btn-user btn-block"
-                onClick={onCancel}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
+*/
